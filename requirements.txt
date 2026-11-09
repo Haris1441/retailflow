@@ -1,0 +1,5 @@
+# dbt-snowflake 1.11 avoids dbt-core 1.12's experimental parser build on
+# Windows, which downloads an additional GitHub wheel and can fail behind a
+# corporate TLS-inspection certificate.
+dbt-core==1.11.6
+dbt-snowflake==1.11.6

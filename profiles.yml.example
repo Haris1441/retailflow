@@ -1,0 +1,15 @@
+retailflow:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('RETAILFLOW_SF_ACCOUNT') }}"
+      user: "{{ env_var('RETAILFLOW_SF_USER') }}"
+      password: "{{ env_var('RETAILFLOW_SF_PASSWORD') }}"
+      authenticator: "{{ env_var('RETAILFLOW_SF_AUTHENTICATOR', 'username_password_mfa') }}"
+      role: "{{ env_var('RETAILFLOW_SF_ROLE', 'ACCOUNTADMIN') }}"
+      warehouse: "{{ env_var('RETAILFLOW_SF_WAREHOUSE', 'RETAILFLOW_WH') }}"
+      database: "{{ env_var('RETAILFLOW_SF_DATABASE', 'RETAIL_DWH') }}"
+      schema: STAGING
+      threads: 4
+      client_session_keep_alive: false
