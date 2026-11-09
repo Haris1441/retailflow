@@ -4,8 +4,8 @@ with source_records as (
 select
     source_record_id, business_key, batch_id, source_operation, source_updated_at,
     source_available_at, ingested_at, run_id, record_hash, raw_payload,
-    try_to_number(raw_payload:event_id) as event_id,
-    try_to_number(raw_payload:customer_id) as customer_id,
+    try_to_number(raw_payload:event_id::string) as event_id,
+    try_to_number(raw_payload:customer_id::string) as customer_id,
     try_to_timestamp_tz(raw_payload:event_timestamp::string) as event_at,
     lower(trim(raw_payload:event_type::string)) as event_type,
     raw_payload:event_payload as event_payload,
