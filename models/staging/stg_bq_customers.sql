@@ -4,7 +4,7 @@ with source_records as (
 select
     source_record_id, business_key, batch_id, source_operation, source_updated_at,
     source_available_at, ingested_at, run_id, record_hash, raw_payload,
-    try_to_number(raw_payload:customer_id) as customer_id,
+    try_to_number(raw_payload:customer_id::string) as customer_id,
     nullif(trim(raw_payload:first_name::string), '') as first_name,
     nullif(trim(raw_payload:last_name::string), '') as last_name,
     nullif(lower(trim(raw_payload:email::string)), '') as email_normalized,
