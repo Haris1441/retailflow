@@ -3,3 +3,7 @@
 target/
 dbt_packages/
 logs/
+
+# local credentials
+profiles.yml
+.user.yml

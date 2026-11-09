@@ -1,0 +1,61 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: "{{ target.database }}"
+    schema: BRONZE
+    loader: retailflow_ingestion
+    config:
+      freshness:
+        loaded_at_field: ingested_at
+        warn_after: {count: 24, period: hour}
+        error_after: {count: 72, period: hour}
+    tables:
+      - name: source_records
+        description: Immutable raw source deliveries loaded by the Python ingestion framework.
+        columns:
+          - name: source_system
+            data_tests: [not_null]
+          - name: entity
+            data_tests: [not_null]
+          - name: source_record_id
+            data_tests: [not_null]
+          - name: raw_payload
+            data_tests: [not_null]
+
+models:
+  - name: stg_bq_customers
+    description: Typed BigQuery customer delivery images. Warnings and validity decisions remain downstream.
+    columns:
+      - name: source_record_id
+        data_tests: [not_null, unique]
+      - name: customer_id
+        data_tests: [not_null]
+  - name: stg_bq_orders
+    description: Typed BigQuery order headers at one Bronze delivery per row.
+    columns:
+      - name: source_record_id
+        data_tests: [not_null, unique]
+      - name: order_id
+        data_tests: [not_null]
+  - name: stg_bq_order_items
+    description: Typed BigQuery order line delivery images.
+    columns:
+      - name: source_record_id
+        data_tests: [not_null, unique]
+      - name: order_item_id
+        data_tests: [not_null]
+  - name: stg_bq_payments
+    description: Typed BigQuery payment event delivery images.
+    columns:
+      - name: source_record_id
+        data_tests: [not_null, unique]
+      - name: payment_id
+        data_tests: [not_null]
+  - name: stg_api_orders
+    description: Typed API order payloads. Items, discounts, shipping, and payment references remain nested for child flattening.
+    columns:
+      - name: source_record_id
+        data_tests: [not_null, unique]
+      - name: order_id
+        data_tests: [not_null]
