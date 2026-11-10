@@ -7,6 +7,8 @@
         post_hook="delete from {{ this }} where key_disposition <> 'ACCEPTED'"
     )
 }}
+-- depends_on: {{ ref('stg_bq_payments') }}
+-- depends_on: {{ ref('stg_api_payments') }}
 -- One current payment attempt or refund event per source system.
 -- The API payments endpoint is authoritative for API payment events; the payment references
 -- nested in API orders are not a second source of cash.

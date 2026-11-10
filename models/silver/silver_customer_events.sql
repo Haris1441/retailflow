@@ -7,6 +7,8 @@
         post_hook="delete from {{ this }} where key_disposition <> 'ACCEPTED'"
     )
 }}
+-- depends_on: {{ ref('stg_bq_customer_events') }}
+-- depends_on: {{ ref('stg_api_events') }}
 -- One current row per event per source system. The 240 re-sent BATCH_005 events are DUPLICATE
 -- dispositions, and event 401's DELETE tombstone removes it, so BigQuery has 11,999 events.
 --
