@@ -2,7 +2,7 @@ with source_records as (
     {{ bronze_source('BIGQUERY', 'customers') }}
 )
 select
-    source_record_id, business_key, batch_id, source_operation, source_updated_at,
+    source_record_id, business_key, batch_id, source_operation, source_effective_at, source_updated_at,
     source_available_at, ingested_at, run_id, record_hash, raw_payload,
     try_to_number(raw_payload:customer_id::string) as customer_id,
     nullif(trim(raw_payload:first_name::string), '') as first_name,
@@ -10,6 +10,8 @@ select
     nullif(lower(trim(raw_payload:email::string)), '') as email_normalized,
     nullif(trim(raw_payload:phone::string), '') as phone,
     raw_payload:gender::string as gender,
+    nullif(trim(raw_payload:preferred_language::string), '') as preferred_language,
+    raw_payload:addresses as addresses,
     try_to_date(raw_payload:birth_date::string) as birth_date,
     try_to_date(raw_payload:registration_date::string) as registration_date,
     upper(trim(raw_payload:customer_status::string)) as customer_status,
