@@ -11,6 +11,13 @@ snapshot-paths: [snapshots]
 target-path: target
 clean-targets: [target, dbt_packages]
 
+vars:
+  # Phase 10 CDC simulation: last visible BigQuery batch. BATCH_999 means all batches.
+  cdc_through_batch: BATCH_999
+  # Hours re-read before an incremental model's watermark. Batch arrivals are immutable,
+  # so 0 is exact; raise it to demonstrate a harmless replay.
+  silver_lookback_hours: 0
+
 models:
   retailflow:
     staging:

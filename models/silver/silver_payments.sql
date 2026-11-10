@@ -1,7 +1,40 @@
+{{
+    config(
+        materialized='incremental',
+        incremental_strategy='delete+insert',
+        unique_key='payment_key',
+        on_schema_change='fail',
+        post_hook="delete from {{ this }} where key_disposition <> 'ACCEPTED'"
+    )
+}}
 -- One current payment attempt or refund event per source system.
 -- The API payments endpoint is authoritative for API payment events; the payment references
 -- nested in API orders are not a second source of cash.
-with bigquery as (
+--
+-- Phase 10: incremental. An incremental run rebuilds only keys with a Bronze delivery after
+-- the watermark (macros/cdc.sql), from every delivery of those keys. delete+insert replaces
+-- their rows; the post-hook removes keys whose top version is no longer ACCEPTED.
+with bigquery_versions as (
+    select
+        v.*,
+        max(v.source_available_at) over (partition by v.business_key) as last_delivery_available_at
+    from {{ ref('int_bq_payments__versions') }} as v
+    {% if is_incremental() %}
+    where v.business_key in ({{ incremental_affected_keys(ref('stg_bq_payments'), 'BIGQUERY') }})
+    {% endif %}
+),
+
+api_versions as (
+    select
+        v.*,
+        max(v.source_available_at) over (partition by v.business_key) as last_delivery_available_at
+    from {{ ref('int_api_payments__versions') }} as v
+    {% if is_incremental() %}
+    where v.business_key in ({{ incremental_affected_keys(ref('stg_api_payments'), 'MOCK_API') }})
+    {% endif %}
+),
+
+bigquery as (
     select
         'BIGQUERY:' || payment_id::varchar as payment_key,
         source_system,
@@ -17,9 +50,10 @@ with bigquery as (
         transaction_reference,
         return_id,
         payment_updated_at,
-        {{ silver_lineage() }}
-    from {{ ref('int_bq_payments__versions') }}
-    where disposition = 'ACCEPTED'
+        {{ silver_lineage() }},
+        {{ silver_incremental_columns() }}
+    from bigquery_versions
+    where version_rank = 1
 ),
 
 api as (
@@ -38,9 +72,10 @@ api as (
         null::varchar as transaction_reference,
         null::number as return_id,
         payment_updated_at,
-        {{ silver_lineage() }}
-    from {{ ref('int_api_payments__versions') }}
-    where disposition = 'ACCEPTED'
+        {{ silver_lineage() }},
+        {{ silver_incremental_columns() }}
+    from api_versions
+    where version_rank = 1
 )
 
 select * from bigquery

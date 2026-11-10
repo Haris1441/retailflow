@@ -3,6 +3,7 @@
 with bronze as (
     select source_system, entity, count(*) as bronze_rows
     from {{ source('bronze', 'source_records') }}
+    where {{ cdc_visible() }}
     group by 1, 2
 ),
 silver as (

@@ -4,7 +4,8 @@
   One output row per staging row (one per Bronze physical delivery), with:
     version_effective_at  business time used to order versions
     content_hash          hash of the business columns (metadata excluded)
-    content_delivery_rank 1 for the first delivery of a given content, >1 for later identical copies
+    content_delivery_rank 1 for a delivery that changes the key's content, >1 for an identical
+                          copy of the delivery just before it (in arrival order)
     is_rejected           the delivery failed a REJECT rule that is not waived (Phase 9)
     version_rank          1 = current version of the business key
     version_count         distinct versions (copies excluded) seen for the key
@@ -17,8 +18,10 @@
       Baseline rows have no source_effective_at, so the payload time keeps a backdated
       correction (BATCH_006) ordered by when it happened, not when it arrived.
     - Ties on business time go to the later availability, then the higher record ID.
-    - A delivery whose content (and operation) matches an earlier delivery of the same key
-      is a DUPLICATE (for example the 240 re-sent events in BATCH_005). It never wins.
+    - A delivery whose content (and operation) matches the delivery just before it, in arrival
+      order, is a DUPLICATE (for example the 240 re-sent events in BATCH_005). It never wins.
+      Comparing with the previous delivery, not any earlier one, keeps a revert (A -> B -> A)
+      as a real change: the second A is a new version and wins (Phase 10).
     - Rejected deliveries rank after every trusted version, so the latest TRUSTED version
       wins. If a key has no trusted version, its top row is REJECTED and the key has no
       current row (it is quarantined).
@@ -26,9 +29,6 @@
 
   checks: optional relation of rule failures for this entity (source_record_id, severity,
   is_waived). Only unwaived REJECT failures reject a delivery.
-
-  Known limit: content that reverts to an earlier value (A -> B -> A) would classify the
-  second A as a duplicate. The fixtures contain no reverts. Phase 10 revisits ordering.
 #}
 {% macro resolve_versions(relation, entity, content_columns, effective_expr='source_updated_at', source_system=none, checks=none) %}
 with base as (
@@ -48,14 +48,24 @@ with base as (
       on r.source_record_id = s.source_record_id
     {% endif %}
 ),
-copies as (
+content_runs as (
+    -- A run is a sequence of consecutive deliveries (in arrival order) with identical content.
     select
         base.*,
+        conditional_change_event(hash(content_hash, source_operation)) over (
+            partition by business_key
+            order by source_available_at, batch_id, source_record_id
+        ) as content_run
+    from base
+),
+copies as (
+    select
+        content_runs.*,
         row_number() over (
-            partition by business_key, content_hash, source_operation
+            partition by business_key, content_run
             order by source_available_at, batch_id, source_record_id
         ) as content_delivery_rank
-    from base
+    from content_runs
 ),
 ranked as (
     select
