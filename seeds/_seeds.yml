@@ -1,0 +1,19 @@
+version: 2
+
+seeds:
+  - name: api_crosswalk
+    description: >
+      Governed mapping from mock API identifiers to the BigQuery-owned product and store keys.
+      Products and stores are owned by BigQuery; the API storefront sells two catalog products
+      through the US web store (Phase 4 contract).
+    config:
+      column_types:
+        source_system: varchar
+        entity: varchar
+        source_id: varchar
+        target_id: number
+    columns:
+      - name: source_id
+        data_tests: [not_null]
+      - name: target_id
+        data_tests: [not_null]

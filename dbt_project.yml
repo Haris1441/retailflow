@@ -17,3 +17,14 @@ models:
       +materialized: view
       +schema: STAGING
       +tags: [staging]
+    silver:
+      +materialized: table
+      +schema: SILVER
+      +tags: [silver]
+      intermediate:
+        +materialized: ephemeral
+
+seeds:
+  retailflow:
+    +schema: SILVER
+    +tags: [silver]

@@ -1,0 +1,4 @@
+source_system,entity,source_id,target_id
+MOCK_API,product,API-PRODUCT-1,1
+MOCK_API,product,API-PRODUCT-2,2
+MOCK_API,store,API-WEB-US,2

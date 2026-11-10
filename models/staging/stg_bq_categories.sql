@@ -2,7 +2,7 @@ with source_records as (
     {{ bronze_source('BIGQUERY', 'categories') }}
 )
 select
-    source_record_id, business_key, batch_id, source_operation, source_updated_at, source_available_at,
+    source_record_id, business_key, batch_id, source_operation, source_effective_at, source_updated_at, source_available_at,
     ingested_at, run_id, record_hash, raw_payload,
     try_to_number(raw_payload:category_id::string) as category_id,
     nullif(trim(raw_payload:category_name::string), '') as category_name,

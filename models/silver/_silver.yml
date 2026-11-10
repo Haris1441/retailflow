@@ -1,0 +1,240 @@
+version: 2
+
+# Silver: one trusted current row per business key, built from STAGING.
+# Keys are source-local: <source_system>:<source id> (source_to_target_mapping.md).
+# Relationship tests on known Phase 1-3 fixture defects are severity: warn. Those rows
+# become quarantine decisions in Phase 9, so a warning here is expected and documented.
+
+models:
+  - name: silver_record_dispositions
+    description: One row per Bronze delivery with its Silver disposition. Counts reconcile to Bronze.
+    columns:
+      - name: delivery_key
+        data_tests: [not_null, unique]
+      - name: disposition
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [ACCEPTED, SUPERSEDED, DUPLICATE, DELETED]
+
+  - name: silver_customers
+    description: Current customer per source system. Soft deletes kept with is_deleted.
+    columns:
+      - name: customer_key
+        data_tests: [not_null, unique]
+
+  - name: silver_customer_addresses
+    description: Customer addresses flattened from the current customer version.
+    columns:
+      - name: customer_address_key
+        data_tests: [not_null, unique]
+      - name: customer_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_customers')
+                field: customer_key
+
+  - name: silver_customer_events
+    description: Current customer events. Duplicates and hard-deleted events removed.
+    columns:
+      - name: event_key
+        data_tests: [not_null, unique]
+      - name: customer_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_customers')
+                field: customer_key
+
+  - name: silver_customer_event_products
+    description: Products referenced by each current event.
+    columns:
+      - name: event_product_key
+        data_tests: [not_null, unique]
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_products')
+                field: product_id
+
+  - name: silver_products
+    description: Current product catalog (BigQuery-owned).
+    columns:
+      - name: product_id
+        data_tests: [not_null, unique]
+      - name: category_id
+        description: Products 41-45 reference missing category 999999 (BATCH_005). Phase 9 rejects them.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_categories')
+                field: category_id
+              config:
+                severity: warn
+      - name: brand_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_brands')
+                field: brand_id
+      - name: supplier_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_suppliers')
+                field: supplier_id
+
+  - name: silver_categories
+    columns:
+      - name: category_id
+        data_tests: [not_null, unique]
+
+  - name: silver_brands
+    columns:
+      - name: brand_id
+        data_tests: [not_null, unique]
+
+  - name: silver_suppliers
+    columns:
+      - name: supplier_id
+        data_tests: [not_null, unique]
+
+  - name: silver_stores
+    columns:
+      - name: store_id
+        data_tests: [not_null, unique]
+
+  - name: silver_promotions
+    columns:
+      - name: promotion_id
+        data_tests: [not_null, unique]
+
+  - name: silver_exchange_rates
+    columns:
+      - name: exchange_rate_key
+        data_tests: [not_null, unique]
+
+  - name: silver_orders
+    description: Current order headers per source system.
+    columns:
+      - name: order_key
+        data_tests: [not_null, unique]
+      - name: customer_key
+        description: Order 10 references missing customer 999999 (BATCH_001). Phase 9 quarantines it.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_customers')
+                field: customer_key
+              config:
+                severity: warn
+      - name: store_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_stores')
+                field: store_id
+
+  - name: silver_order_items
+    description: Current order lines per source system; API lines flattened from order items.
+    columns:
+      - name: order_item_key
+        data_tests: [not_null, unique]
+      - name: order_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_orders')
+                field: order_key
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_products')
+                field: product_id
+
+  - name: silver_order_item_discounts
+    columns:
+      - name: order_item_discount_key
+        data_tests: [not_null, unique]
+      - name: order_item_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_order_items')
+                field: order_item_key
+
+  - name: silver_order_shipments
+    columns:
+      - name: shipment_key
+        data_tests: [not_null, unique]
+      - name: order_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_orders')
+                field: order_key
+
+  - name: silver_order_promotions
+    columns:
+      - name: order_promotion_id
+        data_tests: [not_null, unique]
+      - name: order_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_orders')
+                field: order_key
+      - name: promotion_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_promotions')
+                field: promotion_id
+
+  - name: silver_payments
+    columns:
+      - name: payment_key
+        data_tests: [not_null, unique]
+      - name: order_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_orders')
+                field: order_key
+
+  - name: silver_inventory
+    columns:
+      - name: inventory_key
+        data_tests: [not_null, unique]
+      - name: store_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_stores')
+                field: store_id
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_products')
+                field: product_id
+
+  - name: silver_returns
+    columns:
+      - name: return_id
+        data_tests: [not_null, unique]
+      - name: order_item_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_order_items')
+                field: order_item_key
