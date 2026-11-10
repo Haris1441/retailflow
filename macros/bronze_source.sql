@@ -18,4 +18,5 @@
     from {{ source('bronze', 'source_records') }}
     where source_system = '{{ source_system }}'
       and entity = '{{ entity }}'
+      and {{ cdc_visible() }}
 {% endmacro %}
