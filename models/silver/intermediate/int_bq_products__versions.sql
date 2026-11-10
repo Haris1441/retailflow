@@ -2,6 +2,7 @@
     ref('stg_bq_products'),
     entity='products',
     source_system='BIGQUERY',
+    checks=ref('dq_bq_products__checks'),
     content_columns=[
         'product_id',
         'sku',

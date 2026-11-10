@@ -1,0 +1,2 @@
+delivery_key,rule_id,decision,reason,approved_by,approved_on
+EXAMPLE:none:none,EXAMPLE,EXAMPLE_ONLY,Format example. Only rows with decision ACCEPT waive a rule,nobody,2026-11-10

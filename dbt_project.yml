@@ -24,6 +24,13 @@ models:
       intermediate:
         +materialized: ephemeral
 
+    data_quality:
+      +materialized: table
+      +schema: DATA_QUALITY
+      +tags: [data_quality]
+      checks:
+        +materialized: ephemeral
+
 seeds:
   retailflow:
     +schema: SILVER

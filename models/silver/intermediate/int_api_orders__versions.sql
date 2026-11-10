@@ -2,6 +2,7 @@
     ref('stg_api_orders'),
     entity='orders',
     source_system='MOCK_API',
+    checks=ref('dq_api_orders__checks'),
     content_columns=[
         'order_id',
         'customer_id',

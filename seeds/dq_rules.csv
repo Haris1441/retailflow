@@ -1,0 +1,19 @@
+rule_id,entity,severity,description
+PRD_NEGATIVE_PRICE,products,REJECT,Base price or cost price is negative
+PRD_MISSING_CATEGORY,products,REJECT,Category does not exist among trusted categories
+PRD_MISSING_DESCRIPTION,products,WARN,Product description is missing
+CAT_PARENT_CYCLE,categories,REJECT,Parent link creates a cycle in the category tree as of the change time
+CAT_MISSING_PARENT,categories,REJECT,Parent category does not exist as of the change time
+INV_NEGATIVE_QUANTITY,inventory,REJECT,Quantity on hand or reserved quantity is negative
+RET_QUANTITY_INVALID,returns,REJECT,Return quantity is not positive or exceeds the original line quantity
+RET_MISSING_LINE,returns,REJECT,Original order line does not exist among trusted lines
+OLI_NONPOSITIVE_QUANTITY,order_items,REJECT,Line quantity is zero or negative
+OLI_NEGATIVE_PRICE,order_items,REJECT,Unit price is negative
+OLI_MISSING_PRODUCT,order_items,REJECT,Product does not exist among trusted products
+ORD_MISSING_CUSTOMER,orders,REJECT,Customer does not exist among current customers
+ORD_AMOUNT_MISMATCH,orders,REJECT,Header total differs from lines minus order discount plus shipping by more than 0.01
+ORD_API_ITEM_INVALID,orders,REJECT,An API order line has a nonpositive quantity or an unmapped product
+CUS_MISSING_EMAIL,customers,WARN,Customer email is missing or blank
+CUS_MALFORMED_EMAIL,customers,WARN,Customer email is not a valid address
+CUS_SHARED_EMAIL,customers,WARN,Email is shared by more than one current customer
+SUP_MISSING_CONTACT,suppliers,WARN,Supplier contact email is missing

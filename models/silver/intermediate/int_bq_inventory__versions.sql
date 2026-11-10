@@ -2,6 +2,7 @@
     ref('stg_bq_inventory'),
     entity='inventory',
     source_system='BIGQUERY',
+    checks=ref('dq_bq_inventory__checks'),
     content_columns=[
         'inventory_id',
         'store_id',

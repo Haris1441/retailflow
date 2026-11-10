@@ -2,6 +2,7 @@
     ref('stg_bq_returns'),
     entity='returns',
     source_system='BIGQUERY',
+    checks=ref('dq_bq_returns__checks'),
     content_columns=[
         'return_id',
         'order_id',

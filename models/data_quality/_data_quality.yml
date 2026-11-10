@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: dq_rule_results
+    description: One row per failed rule per delivery. REJECT results cover every delivery; WARN results cover current rows.
+    columns:
+      - name: failure_key
+        data_tests: [not_null, unique]
+      - name: rule_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dq_rules')
+                field: rule_id
+      - name: severity
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [REJECT, WARN]
+      - name: delivery_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_record_dispositions')
+                field: delivery_key
+
+  - name: dq_quarantine
+    description: Deliveries that failed a REJECT rule, with raw payload and status (OPEN or WAIVED).
+    columns:
+      - name: delivery_key
+        data_tests: [not_null, unique]
+      - name: quarantine_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [OPEN, WAIVED]
