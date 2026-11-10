@@ -17,3 +17,46 @@ seeds:
         data_tests: [not_null]
       - name: target_id
         data_tests: [not_null]
+
+  - name: dq_rules
+    description: Catalog of data quality rules. REJECT rules stop a delivery becoming current; WARN rules only report.
+    config:
+      schema: DATA_QUALITY
+      column_types:
+        rule_id: varchar
+        entity: varchar
+        severity: varchar
+        description: varchar
+    columns:
+      - name: rule_id
+        data_tests: [not_null, unique]
+      - name: severity
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [REJECT, WARN]
+
+  - name: dq_waivers
+    description: >
+      Approved exceptions. A row with decision ACCEPT lets one delivery pass one REJECT rule.
+      delivery_key is <source_system>:<entity>:<source_record_id>, as in silver_record_dispositions.
+      Every waiver needs a reason and an approver.
+    config:
+      schema: DATA_QUALITY
+      column_types:
+        delivery_key: varchar
+        rule_id: varchar
+        decision: varchar
+        reason: varchar
+        approved_by: varchar
+        approved_on: date
+    columns:
+      - name: decision
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [ACCEPT, EXAMPLE_ONLY]
+      - name: reason
+        data_tests: [not_null]
+      - name: approved_by
+        data_tests: [not_null]

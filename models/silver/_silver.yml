@@ -2,8 +2,9 @@ version: 2
 
 # Silver: one trusted current row per business key, built from STAGING.
 # Keys are source-local: <source_system>:<source id> (source_to_target_mapping.md).
-# Relationship tests on known Phase 1-3 fixture defects are severity: warn. Those rows
-# become quarantine decisions in Phase 9, so a warning here is expected and documented.
+# Phase 9: rejected deliveries never become current, so references between current rows
+# must hold. Children of quarantined orders stay in Silver as valid records and point at
+# silver_order_publication, which lists every order key with its publication status.
 
 models:
   - name: silver_record_dispositions
@@ -16,7 +17,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: [ACCEPTED, SUPERSEDED, DUPLICATE, DELETED]
+                values: [ACCEPTED, SUPERSEDED, DUPLICATE, REJECTED, DELETED]
 
   - name: silver_customers
     description: Current customer per source system. Soft deletes kept with is_deleted.
@@ -67,14 +68,12 @@ models:
       - name: product_id
         data_tests: [not_null, unique]
       - name: category_id
-        description: Products 41-45 reference missing category 999999 (BATCH_005). Phase 9 rejects them.
+        description: Products 41-45 referenced missing category 999999 in BATCH_005; those changes are rejected.
         data_tests:
           - relationships:
               arguments:
                 to: ref('silver_categories')
                 field: category_id
-              config:
-                severity: warn
       - name: brand_id
         data_tests:
           - relationships:
@@ -124,14 +123,12 @@ models:
       - name: order_key
         data_tests: [not_null, unique]
       - name: customer_key
-        description: Order 10 references missing customer 999999 (BATCH_001). Phase 9 quarantines it.
+        description: Order 10 referenced missing customer 999999 and is quarantined, so every current order has a customer.
         data_tests:
           - relationships:
               arguments:
                 to: ref('silver_customers')
                 field: customer_key
-              config:
-                severity: warn
       - name: store_id
         data_tests:
           - not_null
@@ -149,7 +146,7 @@ models:
         data_tests:
           - relationships:
               arguments:
-                to: ref('silver_orders')
+                to: ref('silver_order_publication')
                 field: order_key
       - name: product_id
         data_tests:
@@ -178,7 +175,7 @@ models:
         data_tests:
           - relationships:
               arguments:
-                to: ref('silver_orders')
+                to: ref('silver_order_publication')
                 field: order_key
 
   - name: silver_order_promotions
@@ -189,7 +186,7 @@ models:
         data_tests:
           - relationships:
               arguments:
-                to: ref('silver_orders')
+                to: ref('silver_order_publication')
                 field: order_key
       - name: promotion_id
         data_tests:
@@ -206,7 +203,7 @@ models:
         data_tests:
           - relationships:
               arguments:
-                to: ref('silver_orders')
+                to: ref('silver_order_publication')
                 field: order_key
 
   - name: silver_inventory
@@ -238,3 +235,15 @@ models:
               arguments:
                 to: ref('silver_order_items')
                 field: order_item_key
+
+  - name: silver_order_publication
+    description: Every order key ever delivered with its publication status for Gold.
+    columns:
+      - name: order_key
+        data_tests: [not_null, unique]
+      - name: publication_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [PUBLISHABLE, HELD, QUARANTINED, DELETED]

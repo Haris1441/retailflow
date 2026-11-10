@@ -2,6 +2,7 @@
     ref('stg_bq_order_items'),
     entity='order_items',
     source_system='BIGQUERY',
+    checks=ref('dq_bq_order_items__checks'),
     content_columns=[
         'order_item_id',
         'order_id',
