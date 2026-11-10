@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: silver_customers_scd2
+    description: >
+      SCD Type 2 customer history from trusted versions. valid_to is exclusive; the open row has
+      valid_to NULL and is_current true. Type 1 columns show the latest value on every row.
+    columns:
+      - name: history_key
+        data_tests: [not_null, unique]
+      - name: customer_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_customers')
+                field: customer_key
+      - name: valid_from
+        data_tests: [not_null]
+
+  - name: silver_products_scd2
+    description: >
+      SCD Type 2 product history from trusted versions (rejected changes excluded).
+      Type 2 on price and classification, Type 1 on descriptive columns.
+    columns:
+      - name: history_key
+        data_tests: [not_null, unique]
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_products')
+                field: product_id
+      - name: valid_from
+        data_tests: [not_null]
+
+  - name: silver_customer_loyalty_scd3
+    description: SCD Type 3 loyalty tier, one row per current customer with the current and previous tier.
+    columns:
+      - name: customer_key
+        data_tests: [not_null, unique]
