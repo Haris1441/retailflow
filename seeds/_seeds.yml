@@ -60,3 +60,19 @@ seeds:
         data_tests: [not_null]
       - name: approved_by
         data_tests: [not_null]
+
+  - name: source_manifest
+    description: >
+      Expected physical rows per source system, entity and batch, from DATA_GENERATION_MANIFEST.md
+      (BigQuery) and the Phase 4 API fixtures. The "source" side of source-to-Bronze reconciliation.
+    config:
+      schema: DATA_QUALITY
+      tags: [reconciliation]
+      column_types:
+        source_system: varchar
+        entity: varchar
+        batch_id: varchar
+        expected_rows: number
+    columns:
+      - name: expected_rows
+        data_tests: [not_null]
