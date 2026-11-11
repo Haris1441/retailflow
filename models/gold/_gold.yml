@@ -1,0 +1,117 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: UTC calendar, 2024-01-01 to 2026-12-31.
+    columns:
+      - name: date_key
+        data_tests: [not_null, unique]
+
+  - name: dim_customer
+    description: Customer SCD Type 2 versions plus the UNKNOWN member.
+    columns:
+      - name: customer_sk
+        data_tests: [not_null, unique]
+
+  - name: dim_product
+    description: Product SCD Type 2 versions with category hierarchy and brand, plus the UNKNOWN member.
+    columns:
+      - name: product_sk
+        data_tests: [not_null, unique]
+
+  - name: dim_store
+    description: Store market and channel (Type 1), plus the unknown member -1.
+    columns:
+      - name: store_sk
+        data_tests: [not_null, unique]
+
+  - name: fct_sales
+    description: One validated order line of a publishable order, with point-in-time dimension keys.
+    columns:
+      - name: order_item_key
+        data_tests: [not_null, unique]
+      - name: customer_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_sk
+      - name: product_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_sk
+      - name: store_sk
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_store')
+                field: store_sk
+      - name: order_date_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+      - name: fulfillment_date_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+      - name: booked_merchandise_local
+        data_tests: [not_null]
+
+  - name: fct_returns
+    description: One validated return line of a published sale.
+    columns:
+      - name: return_key
+        data_tests: [not_null, unique]
+      - name: order_item_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('fct_sales')
+                field: order_item_key
+
+  - name: fct_payments
+    description: One validated payment attempt or refund of a publishable order.
+    columns:
+      - name: payment_key
+        data_tests: [not_null, unique]
+      - name: payment_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [CHARGE, REFUND]
+
+  - name: fct_inventory_snapshot
+    description: One store, product and snapshot date.
+    columns:
+      - name: inventory_key
+        data_tests: [not_null, unique]
+      - name: product_sk
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_sk
+
+  - name: gold_daily_sales
+    columns:
+      - name: date_key
+        data_tests: [not_null, unique]
+
+  - name: gold_monthly_revenue
+    columns:
+      - name: year_month
+        data_tests: [not_null, unique]
+
+  - name: gold_customer_lifetime_value
+    columns:
+      - name: customer_key
+        data_tests: [not_null, unique]

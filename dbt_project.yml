@@ -31,6 +31,11 @@ models:
       intermediate:
         +materialized: ephemeral
 
+    gold:
+      +materialized: table
+      +schema: GOLD
+      +tags: [gold]
+
     data_quality:
       +materialized: table
       +schema: DATA_QUALITY
