@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: mon_file_feeds
+    description: >
+      Phase 14. One row per configured file feed with files loaded, open failures, stuck
+      attempts, last load time and freshness (ON_TIME, LATE or NO_FILES_YET).
+    columns:
+      - name: feed_name
+        data_tests: [not_null, unique]
+      - name: freshness_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [NO_FILES_YET, ON_TIME, LATE]
+  - name: mon_open_file_issues
+    description: >
+      Phase 14. Files that need an operator: latest attempt FAILED, stuck in RECEIVED, or a
+      file name no feed recognises. The warn test assert_no_open_file_failures reads it.
+    columns:
+      - name: attempt_id
+        data_tests: [not_null, unique]

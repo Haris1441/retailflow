@@ -41,6 +41,11 @@ models:
       +schema: DATA_QUALITY
       +tags: [reconciliation]
 
+    monitoring:
+      +materialized: table
+      +schema: DATA_QUALITY
+      +tags: [monitoring]
+
     data_quality:
       +materialized: table
       +schema: DATA_QUALITY

@@ -1,9 +1,21 @@
 -- Layer 1 · Source -> Bronze. Physical rows per source system, entity and batch must equal the
 -- source manifest. A missing batch, an extra batch or a partial load shows as a FAIL row.
-with manifest as (
+-- Phase 14: file deliveries declare their own row counts in their control files, so LOADED files
+-- in CONTROL.FILE_REGISTRY extend the manifest without a hand edit.
+with declared as (
     select source_system, entity, batch_id, expected_rows
     from {{ ref('source_manifest') }}
+    union all
+    select source_system, entity, batch_id, coalesce(expected_rows, extracted_rows)
+    from {{ source('control', 'file_registry') }}
+    where status = 'LOADED'
+),
+
+manifest as (
+    select source_system, entity, batch_id, sum(expected_rows) as expected_rows
+    from declared
     where {{ cdc_visible() }}
+    group by 1, 2, 3
 ),
 
 bronze as (

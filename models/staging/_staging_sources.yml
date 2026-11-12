@@ -33,6 +33,18 @@ sources:
           One row per successful Bronze load, written in the same transaction as the load.
           A replay has inserted_count 0 and matched_count equal to distinct_count.
 
+  - name: control
+    database: "{{ target.database }}"
+    schema: CONTROL
+    loader: retailflow_landing
+    tables:
+      - name: file_config
+        description: Phase 14 feed definitions. FILE_PATTERN is the regex that identifies a feed's files.
+      - name: file_registry
+        description: >
+          Phase 14 file log, one row per processing attempt. LOADED rows carry the run_id of their
+          Bronze load and the row count promised by the file's control file.
+
 models:
   - name: stg_bq_customers
     description: Typed BigQuery customer delivery images. Warnings and validity decisions remain downstream.

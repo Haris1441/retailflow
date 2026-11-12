@@ -1,6 +1,11 @@
 version: 2
 
 models:
+  - name: recon_landing_to_bronze
+    description: Phase 14. Loaded files vs their control files and audited Bronze runs.
+    columns:
+      - name: attempt_id
+        data_tests: [not_null, unique]
   - name: recon_source_to_bronze
     description: Source manifest vs Bronze physical rows per source system, entity and batch.
   - name: recon_bronze_load_audit
