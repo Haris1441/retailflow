@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "type": "AzureKeyVault",
+    "description": "Holds the Snowflake key-pair private key for RETAILFLOW_ADF_USER. ADF reads it with its managed identity.",
+    "typeProperties": { "baseUrl": "https://{{KEY_VAULT}}.vault.azure.net/" }
+  }
+}

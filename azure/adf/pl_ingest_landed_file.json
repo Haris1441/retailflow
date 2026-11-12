@@ -1,0 +1,93 @@
+{
+  "properties": {
+    "description": "Phase 14. One run per file event in landing/inbox/. Snowflake validates and loads the file (CONTROL.PROCESS_LANDED_FILE); ADF moves the files to archive/ or error/ by the returned status and fails the run on FAILED or REJECTED so monitoring shows it.",
+    "concurrency": 1,
+    "parameters": { "fileName": { "type": "string" } },
+    "variables": { "result": { "type": "String" } },
+    "activities": [
+      {
+        "name": "Process file",
+        "type": "Script",
+        "policy": { "timeout": "0.00:15:00", "retry": 1, "retryIntervalInSeconds": 60 },
+        "linkedServiceName": { "referenceName": "ls_snowflake", "type": "LinkedServiceReference" },
+        "typeProperties": {
+          "scripts": [
+            {
+              "type": "Query",
+              "text": {
+                "value": "CALL RETAIL_DWH.CONTROL.PROCESS_LANDED_FILE('@{replace(replace(pipeline().parameters.fileName, '\\', '\\\\'), '''', '''''')}')",
+                "type": "Expression"
+              }
+            }
+          ],
+          "scriptBlockExecutionTimeout": "00:10:00"
+        }
+      },
+      {
+        "name": "Read result",
+        "type": "SetVariable",
+        "dependsOn": [ { "activity": "Process file", "dependencyConditions": [ "Succeeded" ] } ],
+        "typeProperties": {
+          "variableName": "result",
+          "value": { "value": "@string(activity('Process file').output.resultSets[0].rows[0].PROCESS_LANDED_FILE)", "type": "Expression" }
+        }
+      },
+      {
+        "name": "Move files",
+        "type": "ForEach",
+        "dependsOn": [ { "activity": "Read result", "dependencyConditions": [ "Succeeded" ] } ],
+        "typeProperties": {
+          "isSequential": true,
+          "items": { "value": "@json(variables('result')).files", "type": "Expression" },
+          "activities": [
+            {
+              "name": "Copy to destination",
+              "type": "Copy",
+              "policy": { "timeout": "0.00:10:00", "retry": 1 },
+              "inputs": [ { "referenceName": "ds_landing_file", "type": "DatasetReference",
+                            "parameters": { "folder": "inbox", "file": { "value": "@item()", "type": "Expression" } } } ],
+              "outputs": [ { "referenceName": "ds_landing_file", "type": "DatasetReference",
+                             "parameters": {
+                               "folder": { "value": "@if(contains(createArray('LOADED', 'SKIPPED'), json(variables('result')).status), concat('archive/', formatDateTime(utcNow(), 'yyyy-MM-dd')), 'error')", "type": "Expression" },
+                               "file": { "value": "@item()", "type": "Expression" } } } ],
+              "typeProperties": {
+                "source": { "type": "BinarySource", "storeSettings": { "type": "AzureBlobFSReadSettings", "recursive": false } },
+                "sink": { "type": "BinarySink", "storeSettings": { "type": "AzureBlobFSWriteSettings" } },
+                "dataIntegrationUnits": 2
+              }
+            },
+            {
+              "name": "Delete from inbox",
+              "type": "Delete",
+              "dependsOn": [ { "activity": "Copy to destination", "dependencyConditions": [ "Succeeded" ] } ],
+              "typeProperties": {
+                "dataset": { "referenceName": "ds_landing_file", "type": "DatasetReference",
+                             "parameters": { "folder": "inbox", "file": { "value": "@item()", "type": "Expression" } } },
+                "enableLogging": false,
+                "storeSettings": { "type": "AzureBlobFSReadSettings", "recursive": false }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Fail on bad file",
+        "type": "IfCondition",
+        "dependsOn": [ { "activity": "Move files", "dependencyConditions": [ "Succeeded" ] } ],
+        "typeProperties": {
+          "expression": { "value": "@contains(createArray('FAILED', 'REJECTED'), json(variables('result')).status)", "type": "Expression" },
+          "ifTrueActivities": [
+            {
+              "name": "Report file failure",
+              "type": "Fail",
+              "typeProperties": {
+                "message": { "value": "@concat(pipeline().parameters.fileName, ': ', json(variables('result')).message)", "type": "Expression" },
+                "errorCode": { "value": "@concat('FILE_', json(variables('result')).status)", "type": "Expression" }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

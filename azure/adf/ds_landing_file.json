@@ -1,0 +1,16 @@
+{
+  "properties": {
+    "type": "Binary",
+    "description": "One file in the landing container, addressed by folder and name.",
+    "linkedServiceName": { "referenceName": "ls_landing", "type": "LinkedServiceReference" },
+    "parameters": { "folder": { "type": "string" }, "file": { "type": "string" } },
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "fileSystem": "landing",
+        "folderPath": { "value": "@dataset().folder", "type": "Expression" },
+        "fileName": { "value": "@dataset().file", "type": "Expression" }
+      }
+    }
+  }
+}
