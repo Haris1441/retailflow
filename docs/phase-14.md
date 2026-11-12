@@ -100,7 +100,7 @@ dbt build --select tag:staging tag:silver tag:data_quality tag:gold tag:reconcil
 # b) The client sends the same file again
 .\.venv\Scripts\python.exe -m landing simulate --scenario redeliver
 .\.venv\Scripts\python.exe -m landing --prompt-snowflake-password scan
-#    expect SKIPPED  retailco_customer_events_..._001.jsonl  already loaded as ...
+#    expect SKIPPED  <the most recently archived file>  already loaded as ...
 
 # c) A file nobody configured, and a delivery whose control file is wrong
 .\.venv\Scripts\python.exe -m landing simulate --scenario bad-name
@@ -173,4 +173,21 @@ dbt does not change between the two. It still only transforms what is already in
 
 ## Definition of done
 
-The unit tests pass. The build passes before any file arrives (step 0 has 0 items). The demo produces 4 LOADED, 1 SKIPPED, 1 REJECTED and 1 FAILED attempts with 13 rows inserted. After the second build, all 7 reconciliation checks pass, the new customer, product and event versions are current in Silver with history, and the only open issue is the rejected file name.
+The unit tests pass. The build passes before any file arrives (step 0 has 0 items). The demo produces 4 LOADED, 1 REJECTED and 1 FAILED attempts, plus one SKIPPED per redelivery, with 13 rows inserted. After the second build, all 7 reconciliation checks pass, the new customer, product and event versions are current in Silver with history, and the only open issue is the rejected file name.
+
+## Outcome (2026-11-12)
+
+Run locally against Snowflake, then rebuilt in dbt Cloud on `main` with no errors and no warnings.
+
+| Check | Result |
+|---|---|
+| Feeds | 15 configured, 15 enabled |
+| Attempts | 4 LOADED (13 rows inserted), 2 SKIPPED redeliveries of the products file, 1 REJECTED (`customers_latest_FINAL.jsonl`), 1 FAILED (control file promised 4 rows, file had 3), then LOADED after the resend |
+| Lineage | All 4 loaded files point to an audited Bronze run with equal counts |
+| Bronze | `BATCH_20250301T090000`: customer_events 5, customers 3, products 2. `BATCH_20250302T090000`: customers 3 |
+| Silver | 6 customers, 2 products and 5 events from files are current. Events 14400 and 14401 arrived 21 days after they happened and were still picked up by the incremental model |
+| History | Customers 1000 to 1005 each have 2 Type 2 versions split at the delivery time, and a Type 3 previous tier |
+| Reconciliation | 7 of 7 PASS. Step 0 covers 4 files. Step 1 covers 52 batch rows (48 manifest + 4 from control files). Step 2 covers 17 audited runs (13 + 4) |
+| Monitoring | All three active feeds ON_TIME and OK. Customers shows 1 failed attempt and 0 open failures. The only open issue is the rejected file name |
+
+The Azure Data Factory version (`azure/`, `sql/snowflake/01_control/azure_landing.sql`) was written but not deployed: the Azure account has no subscription and pay-as-you-go was declined. The design maps one to one (see the production table above).
