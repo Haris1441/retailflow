@@ -14,7 +14,8 @@ SELECT DETECTED_AT, FILE_NAME, STATUS, BATCH_ID, EXPECTED_ROWS, EXTRACTED_ROWS, 
 FROM CONTROL.FILE_REGISTRY ORDER BY DETECTED_AT;
 -- Expect, in order:
 --   3 x LOADED   delivery: customers 3 rows, products 2, customer_events 5 (all inserted)
---   1 x SKIPPED  redeliver of the customer_events file: "Identical content already loaded as ..."
+--   1 x SKIPPED  per redeliver run: "Identical content already loaded as ..." (the simulator resends the
+--                most recently archived file, for example the products file)
 --   1 x REJECTED customers_latest_FINAL.jsonl, "File name matches no enabled feed pattern"
 --   1 x FAILED   bad-count customers file, "Control file promises 4 rows, the file has 3"
 --   1 x LOADED   the same file name after resend, 3 rows inserted
@@ -22,7 +23,7 @@ FROM CONTROL.FILE_REGISTRY ORDER BY DETECTED_AT;
 -- 3. Status summary.
 SELECT STATUS, COUNT(*) AS attempts, SUM(INSERTED_ROWS) AS inserted
 FROM CONTROL.FILE_REGISTRY GROUP BY STATUS ORDER BY STATUS;
--- Expect FAILED 1 | LOADED 4 (13 inserted) | REJECTED 1 | SKIPPED 1
+-- Expect FAILED 1 | LOADED 4 (13 inserted) | REJECTED 1 | SKIPPED = number of redeliver runs (0 inserted)
 
 -- 4. Lineage: file -> audited run -> Bronze rows. Every row must say OK.
 SELECT r.FILE_NAME, r.RUN_ID, a.INSERTED_COUNT, COUNT(b.SOURCE_RECORD_ID) AS bronze_rows,
@@ -82,7 +83,8 @@ SELECT FEED_NAME, FILES_LOADED, FILES_SKIPPED, FAILED_ATTEMPTS, OPEN_FAILURES, R
        LAST_LOADED_BATCH, ROUND(HOURS_SINCE_LAST_LOAD, 2) AS hours_since, FRESHNESS_STATUS, HEALTH
 FROM DATA_QUALITY.MON_FILE_FEEDS WHERE FILES_LOADED > 0 OR FAILED_ATTEMPTS > 0 ORDER BY FEED_NAME;
 -- Expect customers 2 loaded, 1 failed attempt, 0 open failures, 6 rows;
---        products 1 loaded, 2 rows; customer_events 1 loaded, 1 skipped (the redelivery), 5 rows.
+--        products 1 loaded, 2 rows; customer_events 1 loaded, 5 rows; the redelivered feed also shows
+--        its skipped attempts.
 --        All ON_TIME and OK.
 SELECT ISSUE_TYPE, FILE_NAME, ERROR_MESSAGE FROM DATA_QUALITY.MON_OPEN_FILE_ISSUES;
 -- Expect 1 row: REJECTED_NAME customers_latest_FINAL.jsonl (the resent FAILED file is resolved)

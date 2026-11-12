@@ -100,7 +100,7 @@ dbt build --select tag:staging tag:silver tag:data_quality tag:gold tag:reconcil
 # b) The client sends the same file again
 .\.venv\Scripts\python.exe -m landing simulate --scenario redeliver
 .\.venv\Scripts\python.exe -m landing --prompt-snowflake-password scan
-#    expect SKIPPED  retailco_customer_events_..._001.jsonl  already loaded as ...
+#    expect SKIPPED  <the most recently archived file>  already loaded as ...
 
 # c) A file nobody configured, and a delivery whose control file is wrong
 .\.venv\Scripts\python.exe -m landing simulate --scenario bad-name
@@ -173,4 +173,4 @@ dbt does not change between the two. It still only transforms what is already in
 
 ## Definition of done
 
-The unit tests pass. The build passes before any file arrives (step 0 has 0 items). The demo produces 4 LOADED, 1 SKIPPED, 1 REJECTED and 1 FAILED attempts with 13 rows inserted. After the second build, all 7 reconciliation checks pass, the new customer, product and event versions are current in Silver with history, and the only open issue is the rejected file name.
+The unit tests pass. The build passes before any file arrives (step 0 has 0 items). The demo produces 4 LOADED, 1 REJECTED and 1 FAILED attempts, plus one SKIPPED per redelivery, with 13 rows inserted. After the second build, all 7 reconciliation checks pass, the new customer, product and event versions are current in Silver with history, and the only open issue is the rejected file name.
