@@ -1,0 +1,18 @@
+{
+  "properties": {
+    "type": "BlobEventsTrigger",
+    "description": "Fires for every file created in landing/inbox/. The pipeline decides what to do with it.",
+    "typeProperties": {
+      "blobPathBeginsWith": "/landing/blobs/inbox/",
+      "ignoreEmptyBlobs": true,
+      "scope": "{{STORAGE_ID}}",
+      "events": [ "Microsoft.Storage.BlobCreated" ]
+    },
+    "pipelines": [
+      {
+        "pipelineReference": { "referenceName": "pl_ingest_landed_file", "type": "PipelineReference" },
+        "parameters": { "fileName": "@triggerBody().fileName" }
+      }
+    ]
+  }
+}

@@ -1,0 +1,789 @@
+<title>RetailFlow Field Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky chapter rail on the left (desktop), single column of chapters; layer colours carry meaning (bronze / silver / gold). */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5a6475;
+  --line: #dde2ea;
+  --accent: #2f5bd3;
+  --accent-soft: #e6ecfb;
+  --bronze: #a8662f;
+  --bronze-soft: #f6e9dd;
+  --silver: #5f6f86;
+  --silver-soft: #e8ecf2;
+  --gold: #a07a0c;
+  --gold-soft: #f7efd4;
+  --ok: #1d7a4b;
+  --ok-soft: #e1f2e9;
+  --warn: #9a5b00;
+  --warn-soft: #fbedd6;
+  --bad: #b3261e;
+  --bad-soft: #f9e1df;
+  --code-bg: #eef1f6;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #181e28; --fg: #e4e8ef; --muted: #9aa5b6; --line: #2a3342;
+    --accent: #7d9cf0; --accent-soft: #1f2a44;
+    --bronze: #d99a62; --bronze-soft: #33251a; --silver: #a9b6c9; --silver-soft: #232b37;
+    --gold: #e0b947; --gold-soft: #332b14;
+    --ok: #5cc493; --ok-soft: #15301f; --warn: #e2a64a; --warn-soft: #33270f; --bad: #f08a83; --bad-soft: #3a1b19;
+    --code-bg: #1f2633; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #181e28; --fg: #e4e8ef; --muted: #9aa5b6; --line: #2a3342;
+  --accent: #7d9cf0; --accent-soft: #1f2a44;
+  --bronze: #d99a62; --bronze-soft: #33251a; --silver: #a9b6c9; --silver-soft: #232b37;
+  --gold: #e0b947; --gold-soft: #332b14;
+  --ok: #5cc493; --ok-soft: #15301f; --warn: #e2a64a; --warn-soft: #33270f; --bad: #f08a83; --bad-soft: #3a1b19;
+  --code-bg: #1f2633; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15.5px; line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+.shell { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; }
+nav.rail { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; padding-block: 32px; max-height: 100vh; overflow-y: auto; }
+nav.rail .brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin-bottom: 4px; }
+nav.rail .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 20px; }
+nav.rail ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; counter-reset: ch; }
+nav.rail li { counter-increment: ch; }
+nav.rail a { display: flex; gap: 10px; padding: 5px 8px; border-radius: 6px; color: var(--muted); text-decoration: none; font-size: 13.5px; }
+nav.rail a::before { content: counter(ch, decimal-leading-zero); font-family: var(--font-mono); font-size: 11.5px; color: var(--line); padding-top: 2px; }
+nav.rail a:hover, nav.rail a:focus-visible { background: var(--accent-soft); color: var(--fg); outline: none; }
+main { min-width: 0; padding-block: 32px 80px; }
+header.hero { padding-block: 8px 28px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-family: var(--font-display); font-size: clamp(30px, 4.4vw, 44px); line-height: 1.1; margin: 10px 0 14px; text-wrap: balance; letter-spacing: -0.01em; }
+.lede { font-size: 17.5px; color: var(--muted); max-width: 68ch; margin: 0; }
+.layers { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.chip { font-family: var(--font-mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.chip.b { background: var(--bronze-soft); color: var(--bronze); border-color: transparent; }
+.chip.s { background: var(--silver-soft); color: var(--silver); border-color: transparent; }
+.chip.g { background: var(--gold-soft); color: var(--gold); border-color: transparent; }
+.chip.a { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+section.chapter { padding-block: 40px 8px; border-bottom: 1px solid var(--line); }
+section.chapter:last-of-type { border-bottom: 0; }
+h2 { font-family: var(--font-display); font-size: 27px; line-height: 1.2; margin: 6px 0 12px; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-size: 19px; margin: 28px 0 8px; }
+p, li { max-width: 72ch; }
+p { margin: 0 0 12px; }
+ul, ol { padding-left: 22px; margin: 0 0 14px; }
+li { margin-bottom: 5px; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre.code { font-family: var(--font-mono); font-size: 13px; line-height: 1.55; background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; margin: 0 0 16px; }
+pre.code code { background: none; padding: 0; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: transparent; text-align: center; }
+.caption { font-size: 13px; color: var(--muted); margin-top: -10px; margin-bottom: 18px; }
+.tablewrap { overflow-x: auto; margin: 12px 0 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--muted); background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td code { white-space: nowrap; }
+.callout { border-radius: 10px; padding: 14px 16px; margin: 14px 0 20px; background: var(--accent-soft); }
+.callout strong:first-child { display: block; font-family: var(--font-display); margin-bottom: 4px; }
+.callout.warn { background: var(--warn-soft); }
+.callout.ok { background: var(--ok-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 14px 0 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.card h4 { font-family: var(--font-display); font-size: 15.5px; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.card p { font-size: 14px; margin: 0; color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.dot.b { background: var(--bronze); } .dot.s { background: var(--silver); } .dot.g { background: var(--gold); } .dot.a { background: var(--accent); } .dot.ok { background: var(--ok); }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: 11.5px; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.mute { background: var(--silver-soft); color: var(--silver); }
+.pill.acc { background: var(--accent-soft); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, 190px) minmax(0, 1fr); gap: 8px 18px; margin: 12px 0 20px; }
+dl.gloss dt { font-family: var(--font-display); font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--muted); font-size: 14.5px; }
+.steps { counter-reset: st; list-style: none; padding: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: st; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; max-width: none; }
+.steps li::before { content: counter(st); font-family: var(--font-mono); font-size: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  nav.rail { position: static; max-height: none; padding-block: 20px 0; }
+  nav.rail ol { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  dl.gloss { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
+  dl.gloss dd { margin-bottom: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="shell">
+<nav class="rail" aria-label="Chapters">
+  <div class="brand">RetailFlow</div>
+  <div class="sub">Phases 0–13 · as of 11 Nov 2026</div>
+  <ol>
+    <li><a href="#basics">The basics</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#sources">Source data and ERD</a></li>
+    <li><a href="#loading">Getting data into Snowflake</a></li>
+    <li><a href="#dbt">How dbt works here</a></li>
+    <li><a href="#staging">Staging</a></li>
+    <li><a href="#silver">Silver and versions</a></li>
+    <li><a href="#quality">Data quality</a></li>
+    <li><a href="#incremental">Incremental and CDC</a></li>
+    <li><a href="#scd">Slowly changing dimensions</a></li>
+    <li><a href="#gold">Gold star schema</a></li>
+    <li><a href="#recon">Reconciliation</a></li>
+    <li><a href="#models">Every model</a></li>
+    <li><a href="#dynamic">Dynamic vs hard-coded</a></li>
+    <li><a href="#run">Running it</a></li>
+    <li><a href="#next">What is left</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">Project guide · from zero</div>
+  <h1>How RetailFlow moves a fictional retailer's data from BigQuery to trusted reports in Snowflake</h1>
+  <p class="lede">This guide explains the whole project as if you have never seen a data warehouse: what each piece is, why it exists, how a single order travels from the source to a revenue number, and which parts are dynamic versus written by hand.</p>
+  <div class="layers">
+    <span class="chip">BigQuery + mock API</span>
+    <span class="chip a">Python loader</span>
+    <span class="chip b">Bronze</span>
+    <span class="chip s">Silver</span>
+    <span class="chip g">Gold</span>
+    <span class="chip a">dbt Cloud</span>
+  </div>
+</header>
+
+<!-- 1 -->
+<section class="chapter" id="basics">
+  <div class="eyebrow">Chapter 1</div>
+  <h2>The basics: what problem are we solving?</h2>
+  <p>Imagine an online and in-store retailer. It sells products in 4 countries (US, Pakistan, UK, UAE) through 12 stores, each a store, website or mobile app. Its data lives in two places: a <strong>BigQuery</strong> database (orders, customers, products and 12 more tables) and a small <strong>web API</strong> (a second sales channel). Managers want questions answered such as "what was net revenue in January?" or "which loyalty tier spends most?".</p>
+  <p>Raw source data cannot answer that safely. It has duplicates, late corrections, deleted records, broken references and amounts in four currencies. RetailFlow is a <strong>data platform</strong> that copies the data into <strong>Snowflake</strong> (a cloud data warehouse), cleans it in stages and proves the final numbers are correct. All data is synthetic, generated by us with deliberate defects so every problem can be demonstrated.</p>
+
+  <h3>Words you will see everywhere</h3>
+  <dl class="gloss">
+    <dt>Data warehouse</dt><dd>A database built for analysis rather than for running the shop. Snowflake is ours: database <code>RETAIL_DWH</code>, compute warehouse <code>RETAILFLOW_WH</code>.</dd>
+    <dt>Schema</dt><dd>A folder of tables inside the database. We have BRONZE, STAGING, SILVER, DATA_QUALITY, GOLD, CONTROL and AUDIT.</dd>
+    <dt>Medallion layers</dt><dd>Bronze = raw copy, exactly as received. Silver = cleaned, one trusted row per real-world thing. Gold = report-ready tables and metrics.</dd>
+    <dt>ELT</dt><dd>Extract and Load first (Python copies raw data in), Transform later inside the warehouse (dbt). The opposite of transforming before loading.</dd>
+    <dt>dbt</dt><dd>A tool that runs SQL <code>SELECT</code> statements in a sensible order and saves each result as a table or view. Each SQL file is a <em>model</em>. We run it in <strong>dbt Cloud</strong> from the GitHub repo <code>Haris1441/retailflow</code>.</dd>
+    <dt>Batch</dt><dd>One delivery of source data. BATCH_001 is the starting snapshot; BATCH_002 to BATCH_008 are later changes.</dd>
+    <dt>Business key</dt><dd>The ID the business uses, such as order 10040. Many deliveries can share one business key (the order was created, then updated, then cancelled).</dd>
+    <dt>Idempotent</dt><dd>Running the same thing twice gives the same result as running it once. Essential for safe retries.</dd>
+  </dl>
+
+  <h3>The 13 phases so far</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Phase</th><th>What it added</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>0–1</td><td>Architecture, business rules, metric definitions, source-to-target mapping</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>2–3</td><td>BigQuery fixture data: 15 tables, 119,937 rows, then 7 change batches with planted defects</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>4</td><td>Mock web API (FastAPI) as a second source</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>5</td><td>Snowflake setup and the Python loader into Bronze</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>6</td><td>Metadata-driven loading with watermarks (CONTROL schema)</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>7</td><td>dbt project and 20 staging views</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>7b</td><td>Fivetran comparison (optional)</td><td><span class="pill warn">paused, needs BigQuery billing</span></td></tr>
+      <tr><td>8</td><td>Silver: version resolution, deduplication, deletes</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>9</td><td>Data quality rules, quarantine, waivers</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>10</td><td>Incremental models, CDC replay, late arrivals</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>11</td><td>SCD Type 1, 2 and 3 history</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>12</td><td>Gold star schema and KPI tables</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>13</td><td>End-to-end reconciliation</td><td><span class="pill ok">done</span></td></tr>
+      <tr><td>14–16</td><td>Orchestration and monitoring, CI and cost, final demo</td><td><span class="pill mute">next</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" id="architecture">
+  <div class="eyebrow">Chapter 2</div>
+  <h2>Architecture: the whole picture on one page</h2>
+  <p>Two very different tools do two very different jobs. <strong>Python moves data</strong> from the sources into Snowflake. <strong>dbt never moves data between systems</strong>; it only runs SQL inside Snowflake to turn Bronze into Silver and Gold.</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  subgraph SRC["Sources"]
+    BQ[("BigQuery dataset retailflow_source: 15 tables + 7 change tables")]
+    API["Mock API: orders, customers, payments, events, inventory"]
+  end
+  subgraph PY["Python on your laptop"]
+    ING["ingestion CLI: extract, stage, MERGE"]
+    PIPE["pipeline CLI: watermark-driven runs"]
+  end
+  subgraph SF["Snowflake database RETAIL_DWH"]
+    BR[("BRONZE.SOURCE_RECORDS: every delivery, raw JSON")]
+    AU[("AUDIT.BRONZE_LOAD_RUNS")]
+    CT[("CONTROL: entity config, watermarks, runs")]
+    STG["STAGING: 20 views, typed columns"]
+    SIL["SILVER: current state, history, dispositions"]
+    DQ["DATA_QUALITY: rule results, quarantine, reconciliation"]
+    GLD["GOLD: dimensions, facts, KPI marts"]
+  end
+  DBT{{"dbt Cloud: 95 models, 170 tests"}}
+  BQ --> ING
+  API --> ING
+  API --> PIPE
+  PIPE --> ING
+  ING --> BR
+  ING --> AU
+  PIPE --> CT
+  BR --> STG --> SIL --> GLD
+  SIL --> DQ
+  GLD --> DQ
+  DBT -. "runs SQL" .-> STG
+  DBT -. "runs SQL" .-> SIL
+  DBT -. "runs SQL" .-> DQ
+  DBT -. "runs SQL" .-> GLD
+  FIV["Fivetran (paused)"] -. "optional copy for comparison" .-> FTS[("FIVETRAN_BQQ_RETAILFLOW_SOURCE")]
+  BQ -.-> FIV
+</pre>
+  </div>
+  <p class="caption">Solid arrows move or derive data. Dotted arrows show who executes the SQL.</p>
+
+  <div class="grid2">
+    <div class="card"><h4><span class="dot b"></span>Bronze</h4><p>One table, <code>BRONZE.SOURCE_RECORDS</code>, holds all 127,655 deliveries from both sources as raw JSON. Nothing is ever changed or deleted here.</p></div>
+    <div class="card"><h4><span class="dot s"></span>Silver</h4><p>One trusted current row per business key, with bad changes rejected, duplicates removed and deletes applied. Plus full history for customers and products.</p></div>
+    <div class="card"><h4><span class="dot g"></span>Gold</h4><p>A star schema (dimensions + facts) and KPI tables that implement the business definitions, published only for trusted orders.</p></div>
+    <div class="card"><h4><span class="dot a"></span>Control, audit, quality</h4><p>Bookkeeping that proves the rest: what was loaded and when, which rules failed, and whether every record and dollar is accounted for.</p></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" id="sources">
+  <div class="eyebrow">Chapter 3</div>
+  <h2>The source data and how the tables relate (ERD)</h2>
+  <p>An ERD (entity relationship diagram) shows tables as boxes and how their keys connect. <code>||--o{</code> reads "one ... to zero or many". This is the retailer's business model, the same in BigQuery and in Silver.</p>
+  <div class="diagram">
+<pre class="mermaid">
+erDiagram
+  CUSTOMERS ||--o{ ORDERS : places
+  STORES ||--o{ ORDERS : takes
+  ORDERS ||--|{ ORDER_ITEMS : contains
+  PRODUCTS ||--o{ ORDER_ITEMS : "sold as"
+  CATEGORIES ||--o{ PRODUCTS : classifies
+  CATEGORIES |o--o{ CATEGORIES : "parent of"
+  BRANDS ||--o{ PRODUCTS : makes
+  SUPPLIERS ||--o{ PRODUCTS : supplies
+  ORDERS ||--o{ PAYMENTS : "paid or refunded by"
+  ORDER_ITEMS ||--o{ RETURNS : "returned as"
+  ORDERS ||--o{ ORDER_PROMOTIONS : receives
+  PROMOTIONS ||--o{ ORDER_PROMOTIONS : "applied in"
+  STORES ||--o{ INVENTORY : stocks
+  PRODUCTS ||--o{ INVENTORY : "counted in"
+  CUSTOMERS ||--o{ CUSTOMER_EVENTS : generates
+  CUSTOMERS {
+    int customer_id PK
+    string email
+    string loyalty_tier
+    string country
+    bool is_deleted
+  }
+  ORDERS {
+    int order_id PK
+    int customer_id FK
+    int store_id FK
+    string order_status
+    string currency
+    decimal order_total
+    timestamp fulfilled_at
+  }
+  ORDER_ITEMS {
+    int order_item_id PK
+    int order_id FK
+    int product_id FK
+    int quantity
+    decimal unit_price
+  }
+  PRODUCTS {
+    int product_id PK
+    int category_id FK
+    decimal base_price
+    decimal cost_price
+  }
+  STORES {
+    int store_id PK
+    string country
+    string currency
+    string channel
+  }
+  PAYMENTS {
+    int payment_id PK
+    int order_id FK
+    string payment_type
+    string payment_status
+    decimal payment_amount
+  }
+  RETURNS {
+    int return_id PK
+    int order_item_id FK
+    int return_quantity
+    decimal refund_amount
+  }
+  EXCHANGE_RATES {
+    date rate_date PK
+    string from_currency PK
+    decimal exchange_rate
+  }
+</pre>
+  </div>
+  <p class="caption"><code>EXCHANGE_RATES</code> has no foreign key: it is looked up by currency and date when amounts are converted to USD.</p>
+
+  <h3>The 8 batches: what changed and why it matters</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Batch</th><th class="num">Rows</th><th>What it contains</th><th>What it teaches</th></tr></thead>
+    <tbody>
+      <tr><td><code>BATCH_001</code></td><td class="num">119,937</td><td>The starting snapshot: 5,000 customers, 20,000 orders, 50,000 lines and more, plus planted defects (order 10 missing customer, order 30 wrong total, a zero-quantity line)</td><td>Initial load, quality rules</td></tr>
+      <tr><td><code>BATCH_002</code></td><td class="num">6,070</td><td>2,000 new orders, lines and payments; 68 new exchange rates</td><td>Inserts</td></tr>
+      <tr><td><code>BATCH_003</code></td><td class="num">1,020</td><td>500 pending orders become completed, 10 customers change tier and address, 10 products change price and category</td><td>Updates, history</td></tr>
+      <tr><td><code>BATCH_004</code></td><td class="num">4</td><td>Order 10040 cancelled, its payment failed, one return and one cash refund</td><td>Cancellation, refunds</td></tr>
+      <tr><td><code>BATCH_005</code></td><td class="num">260</td><td>240 re-sent duplicate events, 18 bad changes (negative prices, a category loop, a 99-unit return)</td><td>Duplicates, rejection</td></tr>
+      <tr><td><code>BATCH_006</code></td><td class="num">302</td><td>100 orders dated 45 days in the past, a backdated loyalty change, a corrected exchange rate</td><td>Late-arriving data</td></tr>
+      <tr><td><code>BATCH_007</code></td><td class="num">20</td><td>Customers gain an addresses array and preferred language; events gain a device OS field</td><td>Schema evolution in JSON</td></tr>
+      <tr><td><code>BATCH_008</code></td><td class="num">2</td><td>Customer 111 soft-deleted, event 401 hard-deleted (tombstone)</td><td>Deletes</td></tr>
+      <tr><td><code>API_BATCH_001</code></td><td class="num">40</td><td>8 each of API orders, customers, payments, events, inventory</td><td>Second source, nested JSON</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" id="loading">
+  <div class="eyebrow">Chapter 4</div>
+  <h2>Getting data into Snowflake (the Python loader)</h2>
+  <p>This is the "Extract and Load" in ELT. dbt plays no part. The Python package <code>ingestion</code> reads from BigQuery (or the API) and writes into Snowflake. Every source record becomes one row in a single table, wrapped in a standard <strong>envelope</strong>:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Envelope column</th><th>Meaning</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>source_system</code></td><td>Where it came from</td><td><code>BIGQUERY</code> or <code>MOCK_API</code></td></tr>
+      <tr><td><code>entity</code></td><td>Which source table</td><td><code>orders</code></td></tr>
+      <tr><td><code>source_record_id</code></td><td>Unique ID of this physical delivery</td><td><code>BATCH_003:orders:40:1</code></td></tr>
+      <tr><td><code>business_key</code></td><td>The business ID inside it</td><td><code>40</code></td></tr>
+      <tr><td><code>batch_id</code>, <code>source_operation</code></td><td>Which delivery, and INSERT / UPDATE / DELETE</td><td><code>BATCH_003</code>, <code>UPDATE</code></td></tr>
+      <tr><td><code>source_effective_at</code></td><td>When the change happened in the business</td><td>2025-02-17</td></tr>
+      <tr><td><code>source_available_at</code></td><td>When the change arrived</td><td>2025-02-18</td></tr>
+      <tr><td><code>run_id</code>, <code>ingested_at</code></td><td>Which load wrote it, and when</td><td>a UUID</td></tr>
+      <tr><td><code>raw_payload</code></td><td>The original record, untouched, as JSON</td><td><code>{"order_id": 40, ...}</code></td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Why one table for everything?</strong> Loading never breaks when a source adds a column, because the payload is stored as JSON. Every row can be traced to its batch and load. Interpretation happens later in dbt, where it can be changed and re-run.</p>
+
+  <h3>How one load works</h3>
+  <ol class="steps">
+    <li><span>Extract the records for one source and batch, and stage them in a temporary Snowflake table.</span></li>
+    <li><span>Check the stage: not empty, nothing lost, no record ID with two different contents.</span></li>
+    <li><span><code>MERGE</code> into Bronze on <code>(source_system, entity, source_record_id)</code>: insert only records not already there. Re-running the same batch therefore inserts 0 rows. That is what makes retries safe (idempotent).</span></li>
+    <li><span>Write one row to <code>AUDIT.BRONZE_LOAD_RUNS</code> (extracted, inserted, matched) <strong>in the same transaction</strong>, so the audit can never disagree with Bronze.</span></li>
+  </ol>
+
+  <h3>Watermarks: loading only what is new (Phase 6)</h3>
+  <p>For the API, the <code>pipeline</code> CLI reads its settings from Snowflake tables instead of code. <code>CONTROL.ENTITY_CONFIG</code> says, per entity, which field marks change (<code>updated_at</code>), how much to overlap (60 minutes) and whether it is enabled. <code>CONTROL.WATERMARKS</code> remembers the last successful point. A run reads from <em>watermark minus overlap</em>, loads, and only then advances the watermark. If a run fails, the watermark stays put and the next run simply tries again. The overlap re-reads a little old data on purpose; the idempotent MERGE turns those into harmless matches.</p>
+  <div class="callout"><strong>Where Fivetran fits</strong>Fivetran is a paid tool that does this Extract-Load job for you. We set it up in Phase 7b as an independent comparison landing in its own schema, but BigQuery Sandbox blocks the change detection it needs without billing, so it is paused. It is not part of the main pipeline.</div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" id="dbt">
+  <div class="eyebrow">Chapter 5</div>
+  <h2>How dbt works in this project</h2>
+  <p>A dbt <strong>model</strong> is one <code>.sql</code> file containing a single <code>SELECT</code>. dbt wraps it in <code>CREATE TABLE ... AS</code> (or a view) and runs it in Snowflake. Models refer to each other with <code>{{ ref('model_name') }}</code> and to raw tables with <code>{{ source('bronze', 'source_records') }}</code>. From those references dbt builds a dependency graph and runs everything in the right order.</p>
+  <div class="grid2">
+    <div class="card"><h4><span class="dot a"></span>95 models</h4><p>SQL files that create views or tables.</p></div>
+    <div class="card"><h4><span class="dot a"></span>4 seeds</h4><p>Small CSV files loaded as tables: the API crosswalk, the rule catalog, waivers, the source manifest.</p></div>
+    <div class="card"><h4><span class="dot a"></span>170 tests</h4><p>Queries that must return zero rows: unique keys, valid references, balances, reconciliation.</p></div>
+    <div class="card"><h4><span class="dot a"></span>8 macros</h4><p>Reusable SQL functions written in Jinja, so the same logic serves 20 entities.</p></div>
+  </div>
+
+  <h3>Materializations: how each model is stored</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Type</th><th>What dbt creates</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill acc">view</span></td><td>A saved query, no data stored</td><td>Staging: always up to date, costs nothing to build</td></tr>
+      <tr><td><span class="pill acc">ephemeral</span></td><td>Nothing; the SQL is pasted into the models that use it</td><td>Intermediate version models and quality checks</td></tr>
+      <tr><td><span class="pill acc">table</span></td><td>A full table, rebuilt every run</td><td>Most Silver, Gold and reconciliation models</td></tr>
+      <tr><td><span class="pill acc">incremental</span></td><td>A table updated with only the changed keys</td><td><code>silver_payments</code>, <code>silver_customer_events</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Following one order through every model</h3>
+  <p>This is the lineage of an order, from raw JSON to a revenue number and its proof.</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  SRC[("bronze.source_records")] --> STG["stg_bq_orders (view): JSON to typed columns"]
+  STG --> CHK["dq_bq_orders__checks: REJECT rules"]
+  STG --> INT["int_bq_orders__versions: rank every delivery"]
+  CHK --> INT
+  INT --> SO["silver_orders: current trusted order"]
+  INT --> DISP["silver_record_dispositions: one status per delivery"]
+  DISP --> PUB["silver_order_publication: PUBLISHABLE / HELD / QUARANTINED"]
+  SO --> FS["fct_sales"]
+  PUB --> FS
+  ITEMS["silver_order_items"] --> FS
+  DIMC["dim_customer (SCD2)"] --> FS
+  DIMP["dim_product (SCD2)"] --> FS
+  FX["silver_exchange_rates"] --> FS
+  FS --> M["gold_monthly_revenue, gold_daily_sales, segments, CLV"]
+  FS --> REC["recon_* checks"]
+  M --> REC
+</pre>
+  </div>
+
+  <h3>Where each model lands: the schema routing</h3>
+  <p><code>dbt_project.yml</code> assigns a schema per folder (staging to STAGING, silver to SILVER, and so on). A small macro, <code>generate_schema_name</code>, makes dbt use those names exactly, instead of its default of prefixing them with a developer schema.</p>
+</section>
+
+<!-- 6 -->
+<section class="chapter" id="staging">
+  <div class="eyebrow">Chapter 6</div>
+  <h2><span style="color: var(--silver)">Staging</span>: turning JSON into columns</h2>
+  <p>There is one staging view per source entity: 15 for BigQuery (<code>stg_bq_*</code>) and 5 for the API (<code>stg_api_*</code>). Each does three things:</p>
+  <ol>
+    <li>Filters Bronze to its source and entity, through the <code>bronze_source</code> macro.</li>
+    <li>Pulls fields out of the JSON and gives them proper types, safely. <code>try_to_number(raw_payload:order_id::string)</code> returns NULL instead of crashing on a bad value.</li>
+    <li>Keeps the envelope columns, so every row still knows its batch and arrival time.</li>
+  </ol>
+<pre class="code"><code>-- stg_bq_orders.sql (simplified)
+with source_records as ( {{ bronze_source('BIGQUERY', 'orders') }} )
+select
+    source_record_id, business_key, batch_id, source_operation, source_available_at,
+    try_to_number(raw_payload:order_id::string)              as order_id,
+    try_to_number(raw_payload:customer_id::string)           as customer_id,
+    upper(trim(raw_payload:order_status::string))            as order_status,
+    try_to_decimal(raw_payload:order_total::string, 18, 4)   as order_total,
+    try_to_timestamp_tz(raw_payload:fulfilled_at::string)    as fulfilled_at
+from source_records</code></pre>
+  <p>Staging still contains <em>every</em> delivery, including duplicates and bad ones. Deciding what is true happens in Silver.</p>
+</section>
+
+<!-- 7 -->
+<section class="chapter" id="silver">
+  <div class="eyebrow">Chapter 7</div>
+  <h2><span style="color: var(--silver)">Silver</span>: one trusted version of each thing</h2>
+  <p>Order 40 arrives twice: as PENDING in BATCH_001 and as COMPLETED in BATCH_003. Event 17 arrives twice with identical content. Event 401 arrives, then a DELETE arrives for it. Silver has to decide what is currently true. The <code>resolve_versions</code> macro does this for every entity. It is called by the 20 <code>int_*__versions</code> models.</p>
+
+  <h3>The rules, in order</h3>
+  <ol>
+    <li><strong>Order by business time.</strong> Use when the change happened (<code>source_effective_at</code>, else the record's own <code>updated_at</code>), not when it arrived. A correction dated January that arrives in March is still a January change.</li>
+    <li><strong>Spot duplicates.</strong> If a delivery's content matches the delivery just before it, it is a copy. Content is compared as a hash of the typed business columns.</li>
+    <li><strong>Push rejected changes to the back.</strong> A delivery that failed a quality rule can never be current (Chapter 8).</li>
+    <li><strong>The top-ranked delivery wins.</strong> If it is a DELETE, the key has no current row.</li>
+  </ol>
+
+  <h3>Every delivery gets exactly one disposition</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Disposition</th><th>Meaning</th><th>Example</th><th class="num">BigQuery count</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill ok">ACCEPTED</span></td><td>The current trusted version</td><td>Order 40 as COMPLETED</td><td class="num">126,305</td></tr>
+      <tr><td><span class="pill mute">SUPERSEDED</span></td><td>An older version replaced by a newer one</td><td>Order 40 as PENDING</td><td class="num">1,048</td></tr>
+      <tr><td><span class="pill mute">DUPLICATE</span></td><td>An identical copy of the previous delivery</td><td>The 240 re-sent events</td><td class="num">240</td></tr>
+      <tr><td><span class="pill bad">REJECTED</span></td><td>Failed a quality rule</td><td>Product 31 with price −1</td><td class="num">21</td></tr>
+      <tr><td><span class="pill warn">DELETED</span></td><td>The latest version is a delete</td><td>Event 401</td><td class="num">1</td></tr>
+    </tbody>
+  </table></div>
+  <p>These dispositions are stored in <code>silver_record_dispositions</code>, one row per Bronze delivery. Their total must equal Bronze exactly, 127,655, and a test enforces it.</p>
+  <p>The 21 Silver tables then select the ACCEPTED rows and give them clean keys. A key such as <code>BIGQUERY:40</code> carries its source, because the API and BigQuery are separate systems. Nested API arrays (order items, discounts, shipments) are flattened into their own child tables, one array per table so rows never multiply. The <code>api_crosswalk</code> seed maps API product and store IDs to BigQuery's.</p>
+</section>
+
+<!-- 8 -->
+<section class="chapter" id="quality">
+  <div class="eyebrow">Chapter 8</div>
+  <h2>Data quality: reject, warn, quarantine, waive</h2>
+  <p>18 rules live in the <code>dq_rules</code> seed. Their logic lives in 8 check models under <code>models/data_quality/checks</code>.</p>
+  <div class="grid2">
+    <div class="card"><h4><span class="pill bad">REJECT</span> 13 rules</h4><p>Run on every delivery, before the winner is chosen. A rejected change can never become current; the last trusted version stays. Negative price, missing category, category loop, negative stock, zero quantity, impossible return, missing customer, wrong order total.</p></div>
+    <div class="card"><h4><span class="pill warn">WARN</span> 5 rules</h4><p>Run on current rows and only reported. Missing or malformed email, shared email, missing product description, missing supplier contact.</p></div>
+  </div>
+  <ul>
+    <li><strong>Quarantine</strong> (<code>dq_quarantine</code>): every rejected delivery with its raw JSON and the reason, for example <code>returned=99, sold=2</code>. 21 rows, all OPEN.</li>
+    <li><strong>Waivers</strong> (<code>dq_waivers</code> seed): a person can approve an exception (rule, reason, approver, date). The failure stays on record; only its effect changes.</li>
+    <li><strong>Publication status</strong> (<code>silver_order_publication</code>): PUBLISHABLE, HELD (trusted header but a rejected line, order 20) or QUARANTINED (no trusted header, orders 10 and 30). Gold publishes only PUBLISHABLE orders.</li>
+  </ul>
+  <div class="callout ok"><strong>Why reject before choosing?</strong>If you take the latest version first and filter bad rows afterwards, the good older value is already gone. Ranking rejected deliveries last means products 31–45 automatically keep their January prices.</div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" id="incremental">
+  <div class="eyebrow">Chapter 9</div>
+  <h2>Incremental processing and CDC</h2>
+  <p>"Incremental" means processing only what changed instead of everything every time. It happens at two levels, which are easy to confuse:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Level</th><th>Tool</th><th>What decides "new"</th><th>Safety net</th></tr></thead>
+    <tbody>
+      <tr><td>Source → Bronze</td><td>Python <code>pipeline</code></td><td><code>CONTROL.WATERMARKS</code>, the last loaded <code>updated_at</code>, minus a 60-minute overlap</td><td>MERGE on record ID, so a re-read inserts nothing</td></tr>
+      <tr><td>Bronze → Silver</td><td>dbt incremental models</td><td>The table's own highest <code>last_delivery_available_at</code></td><td>Rebuild each affected key from all of its deliveries</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>How an incremental dbt run works</h3>
+  <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  participant D as dbt run
+  participant T as silver_payments (existing table)
+  participant S as stg_bq_payments
+  D->>T: watermark = highest last_delivery_available_at
+  D->>S: which business keys have a delivery that arrived after the watermark?
+  S-->>D: 100 keys (the late BATCH_006 payments)
+  D->>D: re-rank ALL deliveries of those 100 keys
+  D->>T: delete the old rows of those keys, insert the new rows
+  D->>T: post-hook deletes keys whose winner is now DELETED or REJECTED
+</pre>
+  </div>
+  <ul>
+    <li><strong>Arrival time, not business time.</strong> The late BATCH_006 payments happened on day 9 but arrived on day 54. A watermark on payment date would skip all 100. Arrival time only moves forward.</li>
+    <li><strong>Rebuild the whole key.</strong> A late record still lands in the right place in its key's history.</li>
+    <li><strong>Why only two tables are incremental.</strong> Payments and events depend only on their own deliveries. Products and orders do not: a category change can reject a product with no new product delivery, so "only new keys" would be wrong for them. They stay full rebuilds.</li>
+  </ul>
+
+  <h3>The CDC simulation</h3>
+  <p>All batches are already in Bronze. The dbt variable <code>cdc_through_batch</code> hides later batches, so you can replay history as if each batch were arriving live:</p>
+<pre class="code"><code>dbt build --select tag:staging tag:silver --full-refresh --vars '{cdc_through_batch: BATCH_002}'
+dbt build --select tag:staging tag:silver --vars '{cdc_through_batch: BATCH_004}'   -- rewrote 502 payments
+dbt build --select tag:staging tag:silver --vars '{cdc_through_batch: BATCH_008}'   -- 100 payments, 250 events</code></pre>
+  <p>Phase 10 proved, with content hashes, that the incremental result is identical to a full rebuild, and that replaying changes nothing.</p>
+</section>
+
+<!-- 10 -->
+<section class="chapter" id="scd">
+  <div class="eyebrow">Chapter 10</div>
+  <h2>Slowly changing dimensions: keeping history</h2>
+  <p>Customer 2 was GOLD in January and became SILVER on 17 February. Which tier should a January order count under? Under the one in force at the time. That needs history.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Type</th><th>Behaviour</th><th>Our model</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Type 1</strong></td><td>Overwrite: only the latest value</td><td><code>silver_customers</code>, <code>silver_products</code></td></tr>
+      <tr><td><strong>Type 2</strong></td><td>New row per change, with <code>valid_from</code> and <code>valid_to</code></td><td><code>silver_customers_scd2</code> (5,028 rows), <code>silver_products_scd2</code> (1,011 rows)</td></tr>
+      <tr><td><strong>Type 3</strong></td><td>Current value plus one previous value in extra columns</td><td><code>silver_customer_loyalty_scd3</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>customer</th><th>version</th><th>loyalty_tier</th><th>valid_from</th><th>valid_to</th><th>is_current</th></tr></thead>
+    <tbody>
+      <tr><td>BIGQUERY:12</td><td class="num">1</td><td>STANDARD</td><td>2025-01-01</td><td>2025-01-13</td><td>false</td></tr>
+      <tr><td>BIGQUERY:12</td><td class="num">2</td><td>GOLD</td><td>2025-01-13</td><td>(open)</td><td>true</td></tr>
+    </tbody>
+  </table></div>
+  <p>Customer 12's change took effect on 13 January but only arrived on 24 February. Because Type 2 is built from the version history using business time, it still lands on 13 January. dbt's built-in snapshots would have stamped it 24 February. Only <em>tracked</em> columns create rows; for example, changing the addresses array does not. Rejected changes never appear in history.</p>
+</section>
+
+<!-- 11 -->
+<section class="chapter" id="gold">
+  <div class="eyebrow">Chapter 11</div>
+  <h2><span style="color: var(--gold)">Gold</span>: the star schema and KPIs</h2>
+  <p>A <strong>star schema</strong> puts measurable events (<em>facts</em>: a sale, a payment) in the middle and their descriptions (<em>dimensions</em>: who, what, where, when) around them. Analysts join a fact to dimensions and group by any attribute.</p>
+  <div class="diagram">
+<pre class="mermaid">
+erDiagram
+  DIM_DATE ||--o{ FCT_SALES : "order and fulfillment date"
+  DIM_CUSTOMER ||--o{ FCT_SALES : "version valid at order time"
+  DIM_PRODUCT ||--o{ FCT_SALES : "version valid at order time"
+  DIM_STORE ||--o{ FCT_SALES : "sold at"
+  FCT_SALES ||--o{ FCT_RETURNS : "returned from"
+  DIM_STORE ||--o{ FCT_PAYMENTS : "collected at"
+  DIM_STORE ||--o{ FCT_INVENTORY_SNAPSHOT : "stock at"
+  DIM_PRODUCT ||--o{ FCT_INVENTORY_SNAPSHOT : "stock of"
+  FCT_SALES {
+    string order_item_key PK
+    string customer_sk FK
+    string product_sk FK
+    int store_sk FK
+    int fulfillment_date_key FK
+    bool is_recognized
+    decimal booked_merchandise_usd
+    decimal cost_usd
+  }
+  DIM_CUSTOMER {
+    string customer_sk PK
+    string customer_key
+    string loyalty_tier
+    timestamp valid_from
+    timestamp valid_to
+  }
+  DIM_PRODUCT {
+    string product_sk PK
+    int product_id
+    string category_name
+    string department_name
+    decimal cost_price
+  }
+  DIM_STORE {
+    int store_sk PK
+    string country
+    string channel
+  }
+  DIM_DATE {
+    int date_key PK
+    date date_day
+    string year_month
+  }
+</pre>
+  </div>
+  <h3>Key business rules inside <code>fct_sales</code></h3>
+  <ul>
+    <li><strong>Booked merchandise</strong> = quantity × price − line discount − this line's share of the order discount. Tax and shipping are excluded.</li>
+    <li><strong>Recognized</strong> when the order is fulfilled and not cancelled, pending or deleted, on the UTC fulfillment date.</li>
+    <li><strong>USD conversion</strong> uses the exchange rate of the event date. Local amounts are only added within one currency.</li>
+    <li><strong>Cost</strong> is the product cost at order time, from the product history.</li>
+    <li><strong>Point-in-time keys</strong> <code>customer_sk</code> and <code>product_sk</code> point to the dimension version valid when the order was placed.</li>
+  </ul>
+  <h3>KPI tables</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>Answers</th><th>Example result</th></tr></thead>
+    <tbody>
+      <tr><td><code>gold_monthly_revenue</code></td><td>Net revenue, gross margin, average order value, month-over-month growth</td><td>January net revenue USD 9,171,538.24, margin 40.59 %</td></tr>
+      <tr><td><code>gold_daily_sales</code></td><td>Recognized sales per day, FX coverage</td><td>30 January days + 3 February days</td></tr>
+      <tr><td><code>gold_sales_by_segment_month</code></td><td>Sales by category, loyalty tier at order time, country, channel</td><td>Laptops USD 3,296,312.56</td></tr>
+      <tr><td><code>gold_customer_lifetime_value</code></td><td>Lifetime value and order count per customer</td><td>4,864 customers</td></tr>
+      <tr><td><code>gold_inventory_stockout_daily</code></td><td>Share of store-product snapshots with nothing available</td><td>742 of 8,408</td></tr>
+    </tbody>
+  </table></div>
+  <p>Every Gold number was checked against a separate Python program that recomputes the expected values from the data generation rules. They agreed to the cent.</p>
+</section>
+
+<!-- 12 -->
+<section class="chapter" id="recon">
+  <div class="eyebrow">Chapter 12</div>
+  <h2>Reconciliation: proving nothing was lost</h2>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  M["source_manifest seed: 127,655 expected"] -- "1 counts per batch" --> B[("Bronze 127,655")]
+  B -- "2 rows per load run" --- A[("Load audit: 13 runs, 3 replays")]
+  B -- "3 one disposition each" --> S["Silver"]
+  S -- "4 rows = Gold + 9 exclusions" --> G["Gold facts"]
+  S -- "5 money per currency" --> G
+  G -- "6 marts add up" --> K["KPI marts"]
+</pre>
+  </div>
+  <p>Each arrow is a check in <code>models/reconciliation</code>. <code>recon_summary</code> shows all six. The test <code>assert_reconciliation_passes</code> fails the build if any check breaks. The 9 records Gold leaves out (order 20, five lines and three payments of orders 10, 20 and 30) are listed one by one in <code>recon_gold_exclusions</code>, each with its reason.</p>
+</section>
+
+<!-- 13 -->
+<section class="chapter" id="models">
+  <div class="eyebrow">Chapter 13</div>
+  <h2>Every model and what it does</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Folder · count</th><th>Models</th><th>Job</th><th>Stored as</th></tr></thead>
+    <tbody>
+      <tr><td>staging · 20</td><td><code>stg_bq_*</code> (15), <code>stg_api_*</code> (5)</td><td>JSON payload to typed columns, one view per source entity</td><td>view</td></tr>
+      <tr><td>silver/intermediate · 20</td><td><code>int_bq_*__versions</code>, <code>int_api_*__versions</code></td><td>Rank every delivery and assign its disposition (<code>resolve_versions</code>)</td><td>ephemeral</td></tr>
+      <tr><td>silver · 21</td><td><code>silver_customers</code>, <code>silver_orders</code>, <code>silver_order_items</code>, <code>silver_payments</code>, <code>silver_products</code>, <code>silver_categories</code>, <code>silver_brands</code>, <code>silver_suppliers</code>, <code>silver_stores</code>, <code>silver_promotions</code>, <code>silver_order_promotions</code>, <code>silver_returns</code>, <code>silver_inventory</code>, <code>silver_exchange_rates</code>, <code>silver_customer_events</code>, <code>silver_customer_event_products</code>, <code>silver_customer_addresses</code>, <code>silver_order_item_discounts</code>, <code>silver_order_shipments</code></td><td>One current trusted row per key; nested API arrays as child tables</td><td>table (payments and events incremental)</td></tr>
+      <tr><td></td><td><code>silver_record_dispositions</code></td><td>One row per Bronze delivery with its disposition</td><td>table</td></tr>
+      <tr><td></td><td><code>silver_order_publication</code></td><td>PUBLISHABLE, HELD or QUARANTINED per order</td><td>table</td></tr>
+      <tr><td>silver/history · 3</td><td><code>silver_customers_scd2</code>, <code>silver_products_scd2</code>, <code>silver_customer_loyalty_scd3</code></td><td>History (Chapter 10)</td><td>table</td></tr>
+      <tr><td>data_quality/checks · 8</td><td><code>dq_bq_categories__checks</code>, products, inventory, order_items, orders, returns, <code>dq_api_orders__checks</code>, <code>dq_warnings__checks</code></td><td>Rule failures per delivery</td><td>ephemeral</td></tr>
+      <tr><td>data_quality · 2</td><td><code>dq_rule_results</code>, <code>dq_quarantine</code></td><td>All failures; rejected deliveries with evidence</td><td>table</td></tr>
+      <tr><td>gold/dimensions · 4</td><td><code>dim_date</code>, <code>dim_customer</code>, <code>dim_product</code>, <code>dim_store</code></td><td>Descriptions; customer and product are versioned</td><td>table</td></tr>
+      <tr><td>gold/facts · 4</td><td><code>fct_sales</code>, <code>fct_returns</code>, <code>fct_payments</code>, <code>fct_inventory_snapshot</code></td><td>Measurable events with point-in-time keys</td><td>table</td></tr>
+      <tr><td>gold/marts · 5</td><td><code>gold_daily_sales</code>, <code>gold_monthly_revenue</code>, <code>gold_sales_by_segment_month</code>, <code>gold_customer_lifetime_value</code>, <code>gold_inventory_stockout_daily</code></td><td>KPIs</td><td>table</td></tr>
+      <tr><td>reconciliation · 8</td><td><code>recon_source_to_bronze</code>, <code>recon_bronze_load_audit</code>, <code>recon_bronze_to_silver</code>, <code>recon_gold_exclusions</code>, <code>recon_silver_to_gold</code>, <code>recon_financial</code>, <code>recon_gold_to_marts</code>, <code>recon_summary</code></td><td>End-to-end proof</td><td>table</td></tr>
+    </tbody>
+  </table></div>
+  <h3>The 8 macros (reusable SQL)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Macro</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>bronze_source</code></td><td>Selects one source entity from Bronze, applying the CDC cutoff</td></tr>
+      <tr><td><code>resolve_versions</code></td><td>Ranks deliveries and assigns dispositions; used by all 20 intermediate models</td></tr>
+      <tr><td><code>silver_lineage</code></td><td>Adds standard lineage columns (winning record, batch, version count)</td></tr>
+      <tr><td><code>dq_with_waivers</code></td><td>Adds failure keys and waiver decisions to every check</td></tr>
+      <tr><td><code>cdc</code></td><td><code>cdc_visible</code>, <code>incremental_affected_keys</code>, incremental columns</td></tr>
+      <tr><td><code>scd2_history</code></td><td>Builds Type 2 rows from version history</td></tr>
+      <tr><td><code>gold_helpers</code></td><td><code>utc_date</code>, <code>date_key</code>, <code>as_of</code> point-in-time join</td></tr>
+      <tr><td><code>generate_schema_name</code></td><td>Puts each folder in its exact schema name</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 14 -->
+<section class="chapter" id="dynamic">
+  <div class="eyebrow">Chapter 14</div>
+  <h2>What is dynamic and what is hard-coded</h2>
+  <p>"Dynamic" means the value is worked out from data or settings at run time, so it adapts without a code change. "Hard-coded" means a person wrote it into a file, and changing it needs a commit.</p>
+  <h3>Dynamic: works it out by itself</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Thing</th><th>Driven by</th></tr></thead>
+    <tbody>
+      <tr><td>API loading window</td><td><code>CONTROL.ENTITY_CONFIG</code> (watermark field, overlap, enabled) and <code>CONTROL.WATERMARKS</code>; change a row, not code</td></tr>
+      <tr><td>What gets inserted into Bronze</td><td>The MERGE compares record IDs, so re-runs need no special handling</td></tr>
+      <tr><td>Which version is current</td><td>Computed every build from business time, content hashes and rule results</td></tr>
+      <tr><td>Incremental watermark in Silver</td><td>Read from the target table itself (<code>max(last_delivery_available_at)</code>)</td></tr>
+      <tr><td>Which keys to reprocess</td><td>Keys with deliveries after the watermark</td></tr>
+      <tr><td>Run order of 95 models</td><td>dbt's dependency graph from <code>ref()</code> and <code>source()</code></td></tr>
+      <tr><td>Database and schema names</td><td>Target settings in dbt Cloud plus <code>dbt_project.yml</code> folder config</td></tr>
+      <tr><td>Exchange rate for an amount</td><td>Looked up by currency and event date</td></tr>
+      <tr><td>Dimension version for a fact</td><td>The <code>as_of</code> join on <code>valid_from</code> / <code>valid_to</code></td></tr>
+      <tr><td>Replay cutoff and lookback</td><td>dbt vars <code>cdc_through_batch</code>, <code>silver_lookback_hours</code> passed on the command line</td></tr>
+      <tr><td>Exceptions to rules</td><td>Rows in the <code>dq_waivers</code> seed</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Hard-coded: written by hand, and why</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Thing</th><th>Where</th><th>Why it is hand-written</th><th>Production alternative</th></tr></thead>
+    <tbody>
+      <tr><td>Which fields to extract from each JSON payload</td><td>20 staging models</td><td>Field names and types are a contract with each source</td><td>Generate staging from a schema registry or a YAML spec</td></tr>
+      <tr><td>Content columns that define "a change"</td><td>20 intermediate models</td><td>A business decision per entity</td><td>Keep in YAML metadata and loop in a macro</td></tr>
+      <tr><td>Rule logic and thresholds (price ≥ 0, total within 0.01)</td><td>8 check models; catalog in <code>dq_rules</code></td><td>Each rule is real SQL logic</td><td>dbt tests with severity config, or a rules engine</td></tr>
+      <tr><td>Which columns are SCD Type 2 vs Type 1</td><td><code>silver_*_scd2</code> calls</td><td>Business decision</td><td>Model YAML meta</td></tr>
+      <tr><td>API ID crosswalk</td><td><code>api_crosswalk</code> seed</td><td>Governed mapping, needs review</td><td>A master data management (MDM) system</td></tr>
+      <tr><td>Expected source counts</td><td><code>source_manifest</code> seed</td><td>Must come from outside the warehouse</td><td>Source control totals, file trailers, API counts</td></tr>
+      <tr><td>Status meanings (CANCELED, PENDING, COMPLETED)</td><td><code>fct_sales</code></td><td>Business definition of recognition</td><td>A status mapping seed</td></tr>
+      <tr><td>Reporting currency USD, UTC dates</td><td>Gold models</td><td>Agreed policy in business_rules.md</td><td>Project vars</td></tr>
+      <tr><td>Calendar range 2024–2026</td><td><code>dim_date</code></td><td>Covers the fixtures</td><td>Derive from min and max fact dates</td></tr>
+      <tr><td>Category depth (3 levels)</td><td><code>dim_product</code></td><td>Fixture hierarchy is 3 levels</td><td>Recursive CTE for any depth</td></tr>
+      <tr><td>Which tables are incremental</td><td>Model config</td><td>Only key-local entities are safe</td><td>Dependency expansion for the others</td></tr>
+      <tr><td>Snowflake account, role, warehouse</td><td>dbt Cloud connection, grant SQL files</td><td>Environment setup</td><td>Terraform or infrastructure as code</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><strong>Rule of thumb</strong>Hard-code business decisions, and make them visible and reviewable in Git. Compute anything that follows from data. Never hard-code a number the data can give you, such as a watermark, a current version or a count.</div>
+</section>
+
+<!-- 15 -->
+<section class="chapter" id="run">
+  <div class="eyebrow">Chapter 15</div>
+  <h2>Running it, and where everything lives</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Place</th><th>Contains</th></tr></thead>
+    <tbody>
+      <tr><td>GitHub <code>Haris1441/retailflow</code></td><td>The dbt project; dbt Cloud runs from its <code>main</code> branch. Each phase arrives as a branch and a pull request.</td></tr>
+      <tr><td>Local folder <code>D:\codex-dbt-BQ-to-SF</code></td><td>Everything: docs, Python loader and API, BigQuery and Snowflake SQL, and a copy of the dbt project in <code>dbt_retailflow/</code>. Not a git repo.</td></tr>
+      <tr><td><code>sql/snowflake/00_setup</code></td><td>Bootstrap and grants for <code>RETAIL_DBT_ROLE</code>, run once in Snowsight</td></tr>
+      <tr><td><code>sql/snowflake/05_validation</code></td><td>Evidence queries per phase with expected values</td></tr>
+      <tr><td><code>docs/</code></td><td>One runbook per phase, progress.md and learning_journal.md</td></tr>
+    </tbody>
+  </table></div>
+  <h3>The full build</h3>
+<pre class="code"><code>dbt build --select tag:staging tag:silver tag:data_quality tag:gold tag:reconciliation</code></pre>
+  <p><code>dbt build</code> runs models, seeds and tests together in dependency order. If a test fails, everything downstream of it is skipped, so bad data cannot reach Gold silently.</p>
+</section>
+
+<!-- 16 -->
+<section class="chapter" id="next">
+  <div class="eyebrow">Chapter 16</div>
+  <h2>What is left</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Item</th><th>What it will add</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 14 · Orchestration, monitoring, recovery</td><td>Scheduled dbt Cloud jobs, freshness checks against an agreed maximum delay, run history, alerting, and a rehearsed failure-and-recovery</td></tr>
+      <tr><td>Phase 15 · Testing, CI, docs, cost</td><td>A pull-request check job in dbt Cloud, generated documentation, and a warehouse cost review</td></tr>
+      <tr><td>Phase 16 · Final demonstration</td><td>An end-to-end walkthrough and interview preparation</td></tr>
+      <tr><td>Phase 7b · Fivetran</td><td>Paused until billing is enabled on the <code>bq-dbt-sf</code> project</td></tr>
+      <tr><td>BigQuery Sandbox expiry</td><td>Sandbox tables expire after 60 days, around early January 2027. Snowflake keeps its copy, but a reload from source needs the tables regenerated.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+</main>
+</div>

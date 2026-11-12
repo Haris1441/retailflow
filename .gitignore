@@ -1,9 +1,26 @@
-# you shouldn't commit these into source control
-# these are the default directory names, adjust/add to fit your needs
-target/
-dbt_packages/
-logs/
-
-# local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.p8
+*.key
+*service-account*.json
+application_default_credentials.json
 profiles.yml
+.venv/
+__pycache__/
+.pytest_cache/
+target/
+logs/
+dbt_packages/
+connections.toml
+dbt_retailflow/profiles.yml
+fivetran_rsa_key*
+
+# Phase 14 local landing area (simulated SFTP drop)
+landing_zone/
+landing_zone_client/
+azure/deployment.json
+
+# dbt anonymous usage id
 .user.yml

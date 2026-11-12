@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "type": "AzureBlobFS",
+    "description": "Landing storage (ADLS Gen2). No key: ADF authenticates with its managed identity.",
+    "typeProperties": { "url": "https://{{STORAGE_ACCOUNT}}.dfs.core.windows.net/" }
+  }
+}

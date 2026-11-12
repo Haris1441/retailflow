@@ -1,0 +1,4 @@
+google-cloud-bigquery==3.47.0
+snowflake-connector-python==4.7.4
+httpx==0.28.1
+simplejson==3.20.2

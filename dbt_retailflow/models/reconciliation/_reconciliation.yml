@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: recon_landing_to_bronze
+    description: Phase 14. Loaded files vs their control files and audited Bronze runs.
+    columns:
+      - name: attempt_id
+        data_tests: [not_null, unique]
+  - name: recon_source_to_bronze
+    description: Source manifest vs Bronze physical rows per source system, entity and batch.
+  - name: recon_bronze_load_audit
+    description: Bronze rows per load run vs AUDIT.BRONZE_LOAD_RUNS, including replays.
+    columns:
+      - name: run_id
+        data_tests: [not_null, unique]
+  - name: recon_bronze_to_silver
+    description: Bronze deliveries vs Silver dispositions per source system, entity and batch.
+  - name: recon_gold_exclusions
+    description: Register of current Silver records not published to Gold, with the reason.
+    columns:
+      - name: record_key
+        data_tests: [not_null]
+  - name: recon_silver_to_gold
+    description: Silver rows = Gold rows + registered exclusions, per entity.
+    columns:
+      - name: entity
+        data_tests: [not_null, unique]
+  - name: recon_financial
+    description: Silver amounts = Gold amounts + excluded amounts, per measure and currency.
+  - name: recon_gold_to_marts
+    description: KPI marts add up to the Gold facts.
+  - name: recon_summary
+    description: One row per reconciliation check with PASS or FAIL.
+    columns:
+      - name: step
+        data_tests: [not_null, unique]

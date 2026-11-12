@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "type": "SnowflakeV2",
+    "description": "RetailFlow Snowflake as the key-pair service user. The private key stays in Key Vault.",
+    "typeProperties": {
+      "accountIdentifier": "{{SNOWFLAKE_ACCOUNT}}",
+      "database": "RETAIL_DWH",
+      "warehouse": "RETAILFLOW_WH",
+      "role": "RETAILFLOW_LOADER",
+      "authenticationType": "KeyPair",
+      "user": "RETAILFLOW_ADF_USER",
+      "privateKey": {
+        "type": "AzureKeyVaultSecret",
+        "store": { "referenceName": "ls_keyvault", "type": "LinkedServiceReference" },
+        "secretName": "snowflake-adf-private-key"
+      }
+    }
+  }
+}
