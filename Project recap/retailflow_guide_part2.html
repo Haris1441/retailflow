@@ -1,0 +1,534 @@
+<title>RetailFlow Field Guide II</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky chapter rail on the left (desktop), single column of chapters; layer colours carry meaning (bronze / silver / gold). */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5a6475;
+  --line: #dde2ea;
+  --accent: #2f5bd3;
+  --accent-soft: #e6ecfb;
+  --bronze: #a8662f;
+  --bronze-soft: #f6e9dd;
+  --silver: #5f6f86;
+  --silver-soft: #e8ecf2;
+  --gold: #a07a0c;
+  --gold-soft: #f7efd4;
+  --ok: #1d7a4b;
+  --ok-soft: #e1f2e9;
+  --warn: #9a5b00;
+  --warn-soft: #fbedd6;
+  --bad: #b3261e;
+  --bad-soft: #f9e1df;
+  --code-bg: #eef1f6;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #181e28; --fg: #e4e8ef; --muted: #9aa5b6; --line: #2a3342;
+    --accent: #7d9cf0; --accent-soft: #1f2a44;
+    --bronze: #d99a62; --bronze-soft: #33251a; --silver: #a9b6c9; --silver-soft: #232b37;
+    --gold: #e0b947; --gold-soft: #332b14;
+    --ok: #5cc493; --ok-soft: #15301f; --warn: #e2a64a; --warn-soft: #33270f; --bad: #f08a83; --bad-soft: #3a1b19;
+    --code-bg: #1f2633; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #181e28; --fg: #e4e8ef; --muted: #9aa5b6; --line: #2a3342;
+  --accent: #7d9cf0; --accent-soft: #1f2a44;
+  --bronze: #d99a62; --bronze-soft: #33251a; --silver: #a9b6c9; --silver-soft: #232b37;
+  --gold: #e0b947; --gold-soft: #332b14;
+  --ok: #5cc493; --ok-soft: #15301f; --warn: #e2a64a; --warn-soft: #33270f; --bad: #f08a83; --bad-soft: #3a1b19;
+  --code-bg: #1f2633; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15.5px; line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+.shell { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; }
+nav.rail { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; padding-block: 32px; max-height: 100vh; overflow-y: auto; }
+nav.rail .brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin-bottom: 4px; }
+nav.rail .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 20px; }
+nav.rail ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; counter-reset: ch; }
+nav.rail li { counter-increment: ch; }
+nav.rail a { display: flex; gap: 10px; padding: 5px 8px; border-radius: 6px; color: var(--muted); text-decoration: none; font-size: 13.5px; }
+nav.rail a::before { content: counter(ch, decimal-leading-zero); font-family: var(--font-mono); font-size: 11.5px; color: var(--line); padding-top: 2px; }
+nav.rail a:hover, nav.rail a:focus-visible { background: var(--accent-soft); color: var(--fg); outline: none; }
+main { min-width: 0; padding-block: 32px 80px; }
+header.hero { padding-block: 8px 28px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-family: var(--font-display); font-size: clamp(30px, 4.4vw, 44px); line-height: 1.1; margin: 10px 0 14px; text-wrap: balance; letter-spacing: -0.01em; }
+.lede { font-size: 17.5px; color: var(--muted); max-width: 68ch; margin: 0; }
+.layers { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.chip { font-family: var(--font-mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.chip.b { background: var(--bronze-soft); color: var(--bronze); border-color: transparent; }
+.chip.s { background: var(--silver-soft); color: var(--silver); border-color: transparent; }
+.chip.g { background: var(--gold-soft); color: var(--gold); border-color: transparent; }
+.chip.a { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+section.chapter { padding-block: 40px 8px; border-bottom: 1px solid var(--line); }
+section.chapter:last-of-type { border-bottom: 0; }
+h2 { font-family: var(--font-display); font-size: 27px; line-height: 1.2; margin: 6px 0 12px; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-size: 19px; margin: 28px 0 8px; }
+p, li { max-width: 72ch; }
+p { margin: 0 0 12px; }
+ul, ol { padding-left: 22px; margin: 0 0 14px; }
+li { margin-bottom: 5px; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre.code { font-family: var(--font-mono); font-size: 13px; line-height: 1.55; background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; margin: 0 0 16px; }
+pre.code code { background: none; padding: 0; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 14px 0 20px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: transparent; text-align: center; }
+.caption { font-size: 13px; color: var(--muted); margin-top: -10px; margin-bottom: 18px; }
+.tablewrap { overflow-x: auto; margin: 12px 0 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--muted); background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td code { white-space: nowrap; }
+.callout { border-radius: 10px; padding: 14px 16px; margin: 14px 0 20px; background: var(--accent-soft); }
+.callout strong:first-child { display: block; font-family: var(--font-display); margin-bottom: 4px; }
+.callout.warn { background: var(--warn-soft); }
+.callout.ok { background: var(--ok-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 14px 0 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.card h4 { font-family: var(--font-display); font-size: 15.5px; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.card p { font-size: 14px; margin: 0; color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.dot.b { background: var(--bronze); } .dot.s { background: var(--silver); } .dot.g { background: var(--gold); } .dot.a { background: var(--accent); } .dot.ok { background: var(--ok); }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: 11.5px; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.mute { background: var(--silver-soft); color: var(--silver); }
+.pill.acc { background: var(--accent-soft); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, 190px) minmax(0, 1fr); gap: 8px 18px; margin: 12px 0 20px; }
+dl.gloss dt { font-family: var(--font-display); font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--muted); font-size: 14.5px; }
+.steps { counter-reset: st; list-style: none; padding: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: st; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; max-width: none; }
+.steps li::before { content: counter(st); font-family: var(--font-mono); font-size: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  nav.rail { position: static; max-height: none; padding-block: 20px 0; }
+  nav.rail ol { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  dl.gloss { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
+  dl.gloss dd { margin-bottom: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="shell">
+<nav class="rail" aria-label="Chapters">
+  <div class="brand">RetailFlow</div>
+  <div class="sub">Part II · 11–12 Nov 2026</div>
+  <ol>
+    <li><a href="#since">What changed since Part I</a></li>
+    <li><a href="#why">Why batches were not dynamic</a></li>
+    <li><a href="#flow">The file-driven flow</a></li>
+    <li><a href="#contract">The file contract</a></li>
+    <li><a href="#tables">New control tables</a></li>
+    <li><a href="#code">The landing code</a></li>
+    <li><a href="#downstream">What happens downstream</a></li>
+    <li><a href="#recovery">Failure and recovery</a></li>
+    <li><a href="#recon">Reconciliation and monitoring</a></li>
+    <li><a href="#demo">The demo and its results</a></li>
+    <li><a href="#azure">The Azure Data Factory version</a></li>
+    <li><a href="#repo">One repository for everything</a></li>
+    <li><a href="#housekeeping">Housekeeping</a></li>
+    <li><a href="#dynamic">Dynamic vs hard-coded, updated</a></li>
+    <li><a href="#next">What is next</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">Project guide · Part II · Phase 14</div>
+  <h1>From "someone runs the loader" to "a file arrives and the platform reacts"</h1>
+  <p class="lede">Part I explained Phases 0 to 13. This part covers everything since: the file-driven ingestion pipeline (Phase 14), the Azure Data Factory design we wrote but could not deploy, and the move of the whole project into one Git repository.</p>
+  <div class="layers">
+    <span class="chip">Client files</span>
+    <span class="chip a">Regex + control file</span>
+    <span class="chip a">File registry</span>
+    <span class="chip b">Bronze</span>
+    <span class="chip s">Silver</span>
+    <span class="chip g">Gold</span>
+    <span class="chip a">Monorepo</span>
+  </div>
+</header>
+
+<!-- 1 -->
+<section class="chapter" id="since">
+  <div class="eyebrow">Chapter 1</div>
+  <h2>What changed since Part I</h2>
+  <p>At the end of Part I the platform was complete from Bronze to Gold and proved by reconciliation, but every load still started with a person typing a batch name. You asked what happens when a new batch arrives, and whether the platform could work the way real systems do: a client drops a file, the platform notices it, identifies it by its name and loads it. That question became Phase 14.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Area</th><th>Before (end of Part I)</th><th>Now</th></tr></thead>
+    <tbody>
+      <tr><td>Starting a load</td><td>A person runs <code>python -m ingestion bigquery --batch BATCH_005</code></td><td>A file lands in the inbox; a sensor (<code>watch</code>) or one <code>scan</code> picks it up</td></tr>
+      <tr><td>Knowing what a file is</td><td>The operator says which entity and batch</td><td>A regular expression on the file name, stored in <code>CONTROL.FILE_CONFIG</code></td></tr>
+      <tr><td>Expected row counts</td><td>Hard-coded in Python and in the <code>source_manifest</code> seed</td><td>Declared by the client in a control file, recorded in <code>CONTROL.FILE_REGISTRY</code></td></tr>
+      <tr><td>History of deliveries</td><td>Only the Bronze load audit</td><td>One registry row per attempt: received, loaded, skipped, failed or rejected</td></tr>
+      <tr><td>Reconciliation</td><td>6 checks</td><td>7 checks: new step 0, landed file to Bronze</td></tr>
+      <tr><td>Monitoring</td><td>None</td><td>Feed health and an operator work list, plus a warning in every build</td></tr>
+      <tr><td>Where the code lives</td><td>Only dbt in GitHub; Python, SQL and docs on your PC</td><td>Everything in <code>Haris1441/retailflow</code>; your folder is a Git clone</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" id="why">
+  <div class="eyebrow">Chapter 2</div>
+  <h2>Why batches were not dynamic</h2>
+  <p>A new BigQuery batch (say <code>BATCH_009</code>) needed three manual steps before Phase 14:</p>
+  <ul>
+    <li>The loader only accepted <code>BATCH_001</code> to <code>BATCH_008</code> (a fixed list of choices in the command).</li>
+    <li>It refused a batch whose row count was not in its <code>CHANGE_COUNTS</code> table.</li>
+    <li>Reconciliation failed until someone added the batch to the <code>source_manifest</code> seed.</li>
+  </ul>
+  <p>Those guards were deliberate (an unexpected or half-written batch could not slip in), but they meant a human was the trigger and the source of truth for counts. Batch IDs like <code>BATCH_009</code> also break at 1000, because text comparison puts <code>BATCH_1000</code> before <code>BATCH_999</code>.</p>
+  <p>Everything after Bronze was already dynamic: Silver, history, Gold and reconciliation handle any batch in any order. Only the front door needed work.</p>
+</section>
+
+<!-- 3 -->
+<section class="chapter" id="flow">
+  <div class="eyebrow">Chapter 3</div>
+  <h2>The file-driven flow</h2>
+  <p>This is how most real platforms receive data. The client uploads files (usually over SFTP); the platform reacts to each file, checks it, loads it and records what happened.</p>
+  <div class="diagram"><pre class="mermaid">
+flowchart TD
+  C["Client system"] -->|"uploads data file, then .ctl control file"| I["landing_zone/inbox/"]
+  I --> S{"Sensor: does the name match<br/>a FILE_CONFIG regex?"}
+  S -- "no" --> R["REJECTED → error/"]
+  S -- "yes" --> W{"Control file<br/>arrived?"}
+  W -- "not yet" --> I
+  W -- "yes" --> P["Move to processing/<br/>registry row RECEIVED"]
+  P --> D{"Same SHA-256<br/>already LOADED?"}
+  D -- "yes" --> K["SKIPPED → archive/"]
+  D -- "no" --> V{"Checksum and row count<br/>match the control file?"}
+  V -- "no" --> F["FAILED → error/<br/>nothing loaded"]
+  V -- "yes" --> M["Bronze MERGE + audit row<br/>(one transaction)"]
+  M --> L["LOADED → archive/<br/>registry stores run_id"]
+  L --> T["dbt build<br/>(manual, or dbt Cloud API)"]
+  </pre></div>
+  <p class="caption">Every path ends in a registry row and a folder, so nothing is ever silently dropped.</p>
+  <p>The important design choice: <strong>the Bronze load itself did not change</strong>. A file is turned into the same records the BigQuery loader produced, and goes through the same MERGE that skips records already present and writes its audit row in the same transaction. Phase 14 only added a new way of starting it.</p>
+</section>
+
+<!-- 4 -->
+<section class="chapter" id="contract">
+  <div class="eyebrow">Chapter 4</div>
+  <h2>The file contract</h2>
+  <p>A contract is the agreement between the client and the platform about how files look. Ours has three parts.</p>
+  <h3>1. The file name</h3>
+  <pre class="code"><code>retailco_customers_20250301T090000_001.jsonl
+│        │         │               │   └ format: one JSON record per line
+│        │         │               └ sequence number within the delivery
+│        │         └ delivery timestamp → batch ID BATCH_20250301T090000
+│        └ entity (feed)
+└ client prefix</code></pre>
+  <p>Each feed has a regex in <code>FILE_CONFIG</code>, for example:</p>
+  <pre class="code"><code>retailco_customers_(?P&lt;batch_ts&gt;[0-9]{8}T[0-9]{6})_(?P&lt;seq&gt;[0-9]{3})[.]jsonl</code></pre>
+  <p>The pipeline tries every enabled pattern against the whole file name. Exactly one must match; none or two means REJECTED. The named group <code>batch_ts</code> becomes the batch ID, so batch IDs are timestamps that always sort correctly. Adding a new feed is adding one row to the table.</p>
+  <h3>2. The control file</h3>
+  <pre class="code"><code>{"file_name": "retailco_customers_20250301T090000_001.jsonl", "row_count": 3, "sha256": "9f2c…"}</code></pre>
+  <p>The client writes it <strong>after</strong> the data file. That solves two problems at once:</p>
+  <ul>
+    <li><strong>Half-uploaded files are never read.</strong> The pipeline waits until the control file exists.</li>
+    <li><strong>Damaged or edited files are caught.</strong> The SHA-256 checksum and the row count must match what the client declared.</li>
+  </ul>
+  <h3>3. Each line (the record envelope)</h3>
+  <pre class="code"><code>{"entity": "customers", "source_record_id": "BATCH_20250301T090000:customers:1000:1",
+ "business_key": "1000", "operation": "UPDATE",
+ "effective_at": "2025-03-01T09:00:00Z", "source_available_at": "2025-03-01T09:00:00Z",
+ "payload": {"customer_id": 1000, "loyalty_tier": "GOLD", …}}</code></pre>
+  <p>This is the same shape as the BigQuery change tables, which is why Silver, history and Gold accept file records with no model change. One bad line rejects the whole file.</p>
+</section>
+
+<!-- 5 -->
+<section class="chapter" id="tables">
+  <div class="eyebrow">Chapter 5</div>
+  <h2>New control tables</h2>
+  <p>Two tables in the <code>CONTROL</code> schema, created by <code>sql/snowflake/01_control/file_ingestion.sql</code>. The registry links each loaded file to the Bronze run that loaded it, so you can trace a record back to the exact file it came from.</p>
+  <div class="diagram"><pre class="mermaid">
+erDiagram
+  FILE_CONFIG ||--o{ FILE_REGISTRY : "matches files for"
+  FILE_REGISTRY }o--o| BRONZE_LOAD_RUNS : "run_id (LOADED only)"
+  BRONZE_LOAD_RUNS ||--o{ SOURCE_RECORDS : "run_id"
+  FILE_CONFIG {
+    varchar FEED_NAME PK
+    varchar SOURCE_SYSTEM
+    varchar ENTITY
+    varchar FILE_PATTERN "regex with batch_ts"
+    boolean REQUIRES_CONTROL_FILE
+    number EXPECTED_EVERY_HOURS "freshness SLA"
+    boolean IS_ENABLED
+  }
+  FILE_REGISTRY {
+    varchar ATTEMPT_ID PK
+    varchar FILE_NAME
+    varchar FILE_SHA256
+    varchar FEED_NAME
+    varchar BATCH_ID
+    number EXPECTED_ROWS "from control file"
+    number INSERTED_ROWS
+    number MATCHED_ROWS
+    varchar RUN_ID
+    varchar STATUS
+    varchar ERROR_MESSAGE
+  }
+  BRONZE_LOAD_RUNS {
+    varchar RUN_ID PK
+    number INSERTED_COUNT
+    number MATCHED_COUNT
+  }
+  SOURCE_RECORDS {
+    varchar SOURCE_RECORD_ID
+    varchar BATCH_ID
+    varchar RUN_ID
+    variant RAW_PAYLOAD
+  }
+  </pre></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Status</th><th>Meaning</th><th>File moves to</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill mute">RECEIVED</span></td><td>Attempt started. Still here after an hour means the process stopped mid-file</td><td><code>processing/</code></td></tr>
+      <tr><td><span class="pill ok">LOADED</span></td><td>Validated and merged into Bronze; <code>RUN_ID</code> links to the audit</td><td><code>archive/&lt;date&gt;/</code></td></tr>
+      <tr><td><span class="pill acc">SKIPPED</span></td><td>Same content already loaded; nothing loaded again</td><td><code>archive/&lt;date&gt;/</code></td></tr>
+      <tr><td><span class="pill bad">FAILED</span></td><td>Bad checksum, row count, line or load error; nothing loaded</td><td><code>error/</code></td></tr>
+      <tr><td><span class="pill warn">REJECTED</span></td><td>The name matches no feed</td><td><code>error/</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" id="code">
+  <div class="eyebrow">Chapter 6</div>
+  <h2>The landing code</h2>
+  <p>A new Python package, <code>landing/</code>, next to the existing <code>ingestion/</code> (Bronze loader) and <code>pipeline/</code> (API watermarks).</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>File</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>files.py</code></td><td>Matches names against the regexes, reads and checks control files, turns each line into a Bronze record</td></tr>
+      <tr><td><code>processor.py</code></td><td>The inbox, processing, archive and error folders; one attempt per file; recovery of interrupted files</td></tr>
+      <tr><td><code>registry.py</code></td><td>Reads <code>FILE_CONFIG</code> and writes <code>FILE_REGISTRY</code> rows in Snowflake</td></tr>
+      <tr><td><code>simulator.py</code></td><td>Plays the client: builds realistic change files from records already in Bronze</td></tr>
+      <tr><td><code>dbt_cloud.py</code></td><td>Optional: starts a dbt Cloud job after a load and waits for the result</td></tr>
+      <tr><td><code>__main__.py</code></td><td>The four commands below</td></tr>
+    </tbody>
+  </table></div>
+  <dl class="gloss">
+    <dt><code>simulate</code></dt><dd>Drops files into the inbox as the client would. Scenarios: <code>delivery</code>, <code>redeliver</code>, <code>bad-name</code>, <code>bad-count</code>, <code>resend</code>.</dd>
+    <dt><code>scan</code></dt><dd>One pass over the inbox. This is what an event trigger runs.</dd>
+    <dt><code>watch</code></dt><dd>Runs <code>scan</code> every 15 seconds: a local stand-in for a storage event.</dd>
+    <dt><code>status</code></dt><dd>Shows the latest registry rows.</dd>
+  </dl>
+  <p>12 new unit tests cover the regex, waiting for a control file, rejection, wrong counts, a changed checksum, skipping a resent file, a load failure, a bad line and recovery. All 25 project tests pass.</p>
+</section>
+
+<!-- 7 -->
+<section class="chapter" id="downstream">
+  <div class="eyebrow">Chapter 7</div>
+  <h2>What happens downstream</h2>
+  <p>No staging, Silver or Gold model changed. File records carry <code>SOURCE_SYSTEM = 'BIGQUERY'</code> because they come from the retailer's core system; only the transport differs, and the registry records that. So a normal <code>dbt build</code> takes them in:</p>
+  <div class="grid2">
+    <div class="card"><h4><span class="dot s"></span>Silver versions</h4><p>The file's version of customer 1000 arrived last, so it becomes ACCEPTED and the older one SUPERSEDED.</p></div>
+    <div class="card"><h4><span class="dot s"></span>Incremental events</h4><p>Events 14400 and 14401 happened on 8 Feb but arrived on 1 Mar. The incremental model uses arrival time, so it still picked them up.</p></div>
+    <div class="card"><h4><span class="dot s"></span>History (SCD)</h4><p>Customer 1000 went from SILVER to GOLD. Type 2 closed the old row at 2025-03-01 09:00 and opened a new one; Type 3 shows SILVER as the previous tier.</p></div>
+    <div class="card"><h4><span class="dot g"></span>Gold</h4><p>New sales would join to the GOLD tier, past sales keep SILVER. Product price changes affect future sales only.</p></div>
+  </div>
+  <div class="callout"><strong>Reproducing earlier results</strong>The file batches are real new data, so Phase 11 and 12 expected values no longer match exactly. File batch IDs sort after <code>BATCH_008</code>, so building with <code>--vars '{cdc_through_batch: BATCH_008}'</code> (and a full refresh of the two incremental models) recreates the Phase 13 state.</div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" id="recovery">
+  <div class="eyebrow">Chapter 8</div>
+  <h2>Failure and recovery</h2>
+  <p>Recovery is simple because every step is safe to repeat: the Bronze MERGE skips records already present, a load is one transaction, and only a LOADED registry row counts as done.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Situation</th><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td>Wrong row count or checksum</td><td><span class="pill bad">FAILED</span>, file in <code>error/</code>, warning in dbt</td><td>Ask the client to resend. A successful attempt with the same name closes the issue</td></tr>
+      <tr><td>Process stopped mid-file</td><td><span class="pill mute">RECEIVED</span>, file in <code>processing/</code></td><td>Run <code>scan</code> again. It moves the file back and loads only what is missing</td></tr>
+      <tr><td>Client resends a loaded file</td><td><span class="pill acc">SKIPPED</span></td><td>Nothing; that is the point</td></tr>
+      <tr><td>Unknown file name</td><td><span class="pill warn">REJECTED</span> in the work list</td><td>Agree the name with the client, or add a <code>FILE_CONFIG</code> row for a new feed</td></tr>
+      <tr><td>Same record ID, different content</td><td><span class="pill bad">FAILED</span></td><td>Corrections must arrive as a new batch, never as an edited old file</td></tr>
+      <tr><td>dbt build fails after a load</td><td>Data safe in Bronze</td><td>Fix and rerun; every model rebuilds from Bronze</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter" id="recon">
+  <div class="eyebrow">Chapter 9</div>
+  <h2>Reconciliation and monitoring</h2>
+  <p>Reconciliation gained a step at the very start of the chain, and the expected counts for file batches now come from the client's own control files instead of a hand-edited seed.</p>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  F["Landed file<br/>+ control file"] -->|"0"| B["Bronze"]
+  M["Manifest seed<br/>+ file control counts"] -->|"1"| B
+  B <-->|"2"| A["Load audit"]
+  B -->|"3"| S["Silver"]
+  S -->|"4 rows, 5 money"| G["Gold"]
+  G -->|"6"| K["KPI marts"]
+  </pre></div>
+  <p class="caption">Step 0 checks: control file count = rows read = rows its audited Bronze run extracted, and inserted and matched counts agree.</p>
+  <div class="grid2">
+    <div class="card"><h4><span class="dot a"></span>mon_file_feeds</h4><p>One row per feed: files loaded, skipped, failed, open failures, rows inserted, last load, freshness (ON_TIME, LATE, NO_FILES_YET) and health.</p></div>
+    <div class="card"><h4><span class="dot a"></span>mon_open_file_issues</h4><p>The operator's work list. Empty means nothing to do.</p></div>
+    <div class="card"><h4><span class="dot a"></span>assert_no_open_file_failures</h4><p>A warning-level test. The build publishes what loaded but warns while a failed or stuck file is unresolved.</p></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="chapter" id="demo">
+  <div class="eyebrow">Chapter 10</div>
+  <h2>The demo and its results (12 Nov 2026)</h2>
+  <ol class="steps">
+    <li><span><strong>Normal delivery.</strong> 3 files: 3 customer tier changes, 2 product price changes, 5 new events (2 of them late). All LOADED as <code>BATCH_20250301T090000</code>.</span></li>
+    <li><span><strong>Redelivery.</strong> The products file was sent again, twice. Both SKIPPED by checksum.</span></li>
+    <li><span><strong>Bad name.</strong> <code>customers_latest_FINAL.jsonl</code> matched no feed: REJECTED.</span></li>
+    <li><span><strong>Bad count.</strong> A customers file whose control file promised 4 rows but held 3: FAILED, nothing loaded.</span></li>
+    <li><span><strong>Resend.</strong> The client sent a correct control file: LOADED as <code>BATCH_20250302T090000</code>.</span></li>
+    <li><span><strong>dbt build</strong> on <code>main</code>: no errors, no warnings.</span></li>
+  </ol>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Check</th><th>Result</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Registry</td><td>4 LOADED (13 rows) · 2 SKIPPED · 1 REJECTED · 1 FAILED then recovered</td><td><span class="pill ok">as expected</span></td></tr>
+      <tr><td>Lineage</td><td>Each loaded file → its audited run → the same number of Bronze rows</td><td><span class="pill ok">4 of 4 OK</span></td></tr>
+      <tr><td>Silver</td><td>6 customers, 2 products, 5 events from files are current</td><td><span class="pill ok">as expected</span></td></tr>
+      <tr><td>Late events</td><td>14400 and 14401 arrived 21 days after they happened</td><td><span class="pill ok">picked up</span></td></tr>
+      <tr><td>History</td><td>Customers 1000–1005: 2 Type 2 rows each, Type 3 previous tier</td><td><span class="pill ok">12 rows</span></td></tr>
+      <tr><td>Reconciliation</td><td>Step 0: 4 files · step 1: 52 batch rows (48 + 4) · step 2: 17 runs (13 + 4)</td><td><span class="pill ok">7 of 7 PASS</span></td></tr>
+      <tr><td>Monitoring</td><td>All active feeds ON_TIME and OK; only the rejected name is open</td><td><span class="pill ok">as expected</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 11 -->
+<section class="chapter" id="azure">
+  <div class="eyebrow">Chapter 11</div>
+  <h2>The Azure Data Factory version</h2>
+  <p>You asked where dbt fits if Azure Data Factory (ADF) runs the pipeline. The answer: <strong>ADF moves files and runs steps in order; dbt still only transforms data inside Snowflake.</strong> ADF's last step is to start the dbt job.</p>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  C["Client"] --> L["ADLS landing/inbox"]
+  L -->|"Blob created event"| T["ADF trigger"]
+  T --> P["Script: CALL PROCESS_LANDED_FILE"]
+  P -->|"Snowflake reads the file<br/>through a storage integration"| SF[("Snowflake Bronze")]
+  P --> MV["Copy + Delete to archive/ or error/"]
+  MV --> D["Web activity: dbt Cloud job"]
+  D --> DB["dbt build in Snowflake"]
+  </pre></div>
+  <p>We wrote the full design as code, ready to deploy:</p>
+  <ul>
+    <li><code>azure/deploy.ps1</code>: resource group, ADLS storage, Key Vault, Data Factory and all access rights.</li>
+    <li><code>azure/adf/</code>: linked services, dataset, pipeline and storage event trigger as JSON.</li>
+    <li><code>sql/snowflake/01_control/azure_landing.sql</code>: the storage integration, the stage, a Python stored procedure with the same checks as the local pipeline, and a key-pair service user for ADF.</li>
+    <li><code>azure/client.ps1</code> and <code>azure/trigger.ps1</code>: the client uploads and the trigger switch.</li>
+  </ul>
+  <div class="callout warn"><strong>Why it was not deployed</strong>We installed Azure CLI and signed in, but the account had no Azure subscription. The free account had already been used and you chose not to switch to pay-as-you-go. SFTP on Azure Blob storage would also have cost about $0.30 per hour while switched on. The code stays in the repository as infrastructure as code, and the local pipeline proves the same design.</div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Local (built and validated)</th><th>Azure equivalent (written, not deployed)</th></tr></thead>
+    <tbody>
+      <tr><td><code>landing_zone/inbox/</code></td><td>ADLS Gen2 container <code>landing/inbox/</code> (or SFTP on top)</td></tr>
+      <tr><td><code>watch</code> polling every 15 s</td><td>Event Grid storage event → ADF trigger</td></tr>
+      <tr><td>Python regex and checks</td><td>Same rules in a Snowflake Python procedure</td></tr>
+      <tr><td>Folder moves in Python</td><td>ADF Copy and Delete activities</td></tr>
+      <tr><td><code>--trigger-dbt</code></td><td>ADF Web activity calling the dbt Cloud API</td></tr>
+      <tr><td><code>FILE_CONFIG</code>, <code>FILE_REGISTRY</code>, step 0, monitoring</td><td>Exactly the same</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 12 -->
+<section class="chapter" id="repo">
+  <div class="eyebrow">Chapter 12</div>
+  <h2>One repository for everything</h2>
+  <p>Until now only the dbt project was in GitHub; the Python, SQL, API and docs lived only on your PC. You pointed out that this is not industry standard, so the whole platform moved into <code>Haris1441/retailflow</code> (merged as PR #10).</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Folder</th><th>Holds</th></tr></thead>
+    <tbody>
+      <tr><td><code>dbt_retailflow/</code></td><td>The dbt project. dbt Cloud's project subdirectory is now <code>dbt_retailflow</code></td></tr>
+      <tr><td><code>ingestion/</code>, <code>pipeline/</code>, <code>landing/</code></td><td>Python loaders and the file pipeline</td></tr>
+      <tr><td><code>api/</code></td><td>The mock API (second source)</td></tr>
+      <tr><td><code>sql/</code></td><td>BigQuery fixtures, Snowflake setup, grants, validation</td></tr>
+      <tr><td><code>azure/</code></td><td>The undeployed Azure Data Factory version</td></tr>
+      <tr><td><code>tests/unit/</code></td><td>Python unit tests</td></tr>
+      <tr><td><code>docs/</code>, <code>Project recap/</code></td><td>Runbooks, roadmap, learning journal, these guides</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Nothing secret is committed.</strong> Files were scanned before the first commit; <code>.env</code>, <code>profiles.yml</code>, keys, <code>connections.toml</code>, the local landing folders and <code>azure/deployment.json</code> are in <code>.gitignore</code>.</li>
+    <li><strong>History kept.</strong> The 134 dbt files show as moves, not as deletions and new files.</li>
+    <li><strong>Your folder is the clone.</strong> <code>D:\codex-dbt-BQ-to-SF</code> tracks GitHub; there is no copy-and-sync step any more.</li>
+  </ul>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  M1["main"] -->|"git checkout -b"| B["feature branch"]
+  B -->|"commit + push"| GH["GitHub branch"]
+  GH -->|"pull request + merge"| M2["main"]
+  M2 -->|"git pull"| L["your folder"]
+  M2 -->|"pull in Studio"| DC["dbt Cloud"]
+  </pre></div>
+  <p class="caption">The workflow from now on. PR #11 then merged the Phase 14 results the same way.</p>
+</section>
+
+<!-- 13 -->
+<section class="chapter" id="housekeeping">
+  <div class="eyebrow">Chapter 13</div>
+  <h2>Housekeeping</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Item</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td>A password was pasted into the chat</td><td><span class="pill warn">change it</span> It was not used; change it wherever it is used</td></tr>
+      <tr><td>Branch protection on <code>main</code></td><td><span class="pill mute">on hold</span> <code>main</code> is unprotected and the repo is public; revisit with CI in Phase 15</td></tr>
+      <tr><td>Old branches <code>phase-14-orchestration</code>, <code>phase-14-demo-notes</code>, <code>repo-monorepo</code></td><td><span class="pill ok">safe to delete</span> All fully merged into <code>main</code></td></tr>
+      <tr><td>Local <code>main</code> not tracking GitHub</td><td><span class="pill ok">fixed</span> Linked to <code>origin/main</code>; new branches link on first push</td></tr>
+      <tr><td>Git identity in the local folder</td><td><span class="pill ok">set</span> Same name and email as earlier commits, this repo only</td></tr>
+      <tr><td>Azure CLI</td><td><span class="pill ok">installed</span> Signed in; no subscription on the account</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 14 -->
+<section class="chapter" id="dynamic">
+  <div class="eyebrow">Chapter 14</div>
+  <h2>Dynamic vs hard-coded, updated</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Thing</th><th>Now</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td>Which feed a file belongs to</td><td><span class="pill ok">dynamic</span></td><td>Regex in <code>FILE_CONFIG</code></td></tr>
+      <tr><td>Batch ID</td><td><span class="pill ok">dynamic</span></td><td>From the file name's timestamp</td></tr>
+      <tr><td>Expected rows for file batches</td><td><span class="pill ok">dynamic</span></td><td>Control file, recorded in the registry</td></tr>
+      <tr><td>When a load starts</td><td><span class="pill ok">dynamic</span></td><td>File arrival (<code>watch</code>), or one <code>scan</code></td></tr>
+      <tr><td>Adding a new feed</td><td><span class="pill ok">config</span></td><td>One <code>FILE_CONFIG</code> row, plus a staging model if the entity is new</td></tr>
+      <tr><td>Original BigQuery batches 001–008</td><td><span class="pill mute">hard-coded</span></td><td>Still in the loader and the manifest seed, as the historical baseline</td></tr>
+      <tr><td>Business rules, quality rules, history columns</td><td><span class="pill mute">hand-written</span></td><td>Business decisions, as in Part I</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 15 -->
+<section class="chapter" id="next">
+  <div class="eyebrow">Chapter 15</div>
+  <h2>What is next</h2>
+  <div class="grid2">
+    <div class="card"><h4><span class="dot a"></span>Phase 15</h4><p>CI on every pull request (Python tests, dbt parse), branch protection that requires it, generated documentation, and a cost review of Snowflake and dbt Cloud.</p></div>
+    <div class="card"><h4><span class="dot a"></span>Phase 16</h4><p>Final operational demo, portfolio write-up and an interview walkthrough of the whole platform.</p></div>
+    <div class="card"><h4><span class="dot b"></span>Still paused</h4><p>Phase 7b Fivetran comparison (needs BigQuery billing). The BigQuery Sandbox expires in early January 2027.</p></div>
+  </div>
+</section>
+</main>
+</div>
