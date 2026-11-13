@@ -18,6 +18,17 @@ Everything lives in this one repository: https://github.com/Haris1441/retailflow
 
 Never committed: `.env`, `profiles.yml`, private keys, `connections.toml`, `.venv/`, the local landing folders and `azure/deployment.json` (see `.gitignore`).
 
+## Local Python environment
+
+Use the signed Python from python.org (for example `winget install Python.Python.3.13`). Windows Smart App Control blocks unsigned Python builds, such as those installed by `uv`, and the unsigned `dbt.exe` launcher that pip creates.
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe" -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r ingestion\requirements.txt -r api\requirements.txt -r dbt_retailflow\requirements.txt
+.\.venv\Scripts\python.exe -m pytest tests\unit api\tests -q
+.\scripts\dbt.ps1 --version        # dbt through the signed python.exe, not dbt.exe
+```
+
 ## Start here
 
 1. Clone the repository and open PowerShell in its root.
