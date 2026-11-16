@@ -1,0 +1,65 @@
+# Phase 15 · Continuous integration. Runs on every pull request to main and on every push to main.
+# No secrets: the dbt checks use placeholder credentials and never connect to Snowflake.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-tests:
+    name: Python tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            ingestion/requirements.txt
+            api/requirements.txt
+      - name: Install dependencies
+        run: pip install -r ingestion/requirements.txt -r api/requirements.txt
+      - name: Unit and API tests
+        run: python -m pytest tests/unit api/tests -q
+
+  dbt-checks:
+    name: dbt parse and compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: dbt_retailflow
+    env:
+      # Placeholders: parse and compile render SQL without logging in to Snowflake.
+      RETAILFLOW_SF_ACCOUNT: ci-placeholder
+      RETAILFLOW_SF_USER: ci-placeholder
+      RETAILFLOW_SF_PASSWORD: ci-placeholder
+      DBT_SEND_ANONYMOUS_USAGE_STATS: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: dbt_retailflow/requirements.txt
+      - name: Install dbt
+        run: pip install -r requirements.txt
+      - name: Placeholder profile
+        run: cp profiles.yml.example profiles.yml
+      - name: dbt parse (all models, tests, sources, refs, YAML)
+        run: dbt parse --profiles-dir .
+      - name: dbt compile (every model except the two incremental ones, which need a live connection)
+        run: dbt compile --profiles-dir . --no-populate-cache --exclude config.materialized:incremental
