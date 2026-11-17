@@ -3,6 +3,8 @@
 -- dates, so "hours since last load" is real operational freshness.
 --   freshness_status  NO_FILES_YET | ON_TIME | LATE (no load within EXPECTED_EVERY_HOURS)
 --   health            OK | ATTENTION (a file whose latest attempt failed, or an attempt stuck in RECEIVED)
+-- Phase 15: last_attempt_at / last_attempt_status show the latest activity of any kind, so a feed
+-- whose files keep failing is visible even though last_loaded_at does not move.
 with config as (
     select feed_name, source_system, entity, file_pattern, expected_every_hours, is_enabled
     from {{ source('control', 'file_config') }}
@@ -24,7 +26,9 @@ per_feed as (
         count_if(status = 'RECEIVED' and detected_at < dateadd(hour, -1, current_timestamp())) as stuck_attempts,
         coalesce(sum(iff(status = 'LOADED', inserted_rows, 0)), 0) as rows_inserted,
         max(iff(status = 'LOADED', finished_at, null)) as last_loaded_at,
-        max_by(iff(status = 'LOADED', batch_id, null), iff(status = 'LOADED', finished_at, null)) as last_loaded_batch
+        max_by(iff(status = 'LOADED', batch_id, null), iff(status = 'LOADED', finished_at, null)) as last_loaded_batch,
+        max(detected_at) as last_attempt_at,
+        max_by(status, detected_at) as last_attempt_status
     from attempts
     where feed_name is not null
     group by feed_name
@@ -45,6 +49,8 @@ select
     coalesce(p.rows_inserted, 0) as rows_inserted,
     p.last_loaded_at,
     p.last_loaded_batch,
+    p.last_attempt_at,
+    p.last_attempt_status,
     datediff(minute, p.last_loaded_at, current_timestamp()) / 60.0 as hours_since_last_load,
     case
         when p.last_loaded_at is null then 'NO_FILES_YET'
