@@ -267,3 +267,25 @@ Monitoring is a table someone reads, plus an alert. `mon_open_file_issues` shoul
 3. The loader crashes after the Bronze commit but before the registry update. What happens on the next scan?
 4. Why should a correction arrive as a new batch rather than as an edited old file?
 5. Which parts of this design change when you move to Azure Data Factory, and which stay?
+
+## Phase 15
+
+CI is a set of cheap checks before the expensive ones. Parse and compile run in seconds without a warehouse and catch most mistakes (refs, YAML, Jinja). Only what passes that reaches Snowflake, and then only the changed models and their children (`state:modified+`), with everything else read from production (deferral).
+
+A CI build must never write where production reads. The schema macro gives each pull request its own schemas, and dbt Cloud drops them when the PR closes. The same macro gives a developer a prefix, so nobody overwrites the real tables by accident.
+
+A check that is not required is a suggestion. The ruleset is what turns three green ticks into a rule: no merge to `main` without them, and no pushes around them.
+
+Plan limits are design inputs. With 3,000 models a month on the free plan and 98 models, a daily full build would starve CI, so production runs three times a week.
+
+Cost review starts with metering, not with tuning queries. The models were fast. The money went to a worksheet warehouse sitting idle for five minutes after every session. Auto-suspend and a resource monitor are the first guardrails, and they are cheaper than any optimisation.
+
+Integrations matter: dbt Cloud connected by a plain git URL can deploy but cannot see pull requests. CI needed the GitHub app.
+
+### Practice questions
+
+1. Why run `dbt parse` and `dbt compile` in GitHub Actions if dbt Cloud CI builds the models anyway?
+2. What does deferral read for a model that was not changed in the PR, and what happens if production has never run?
+3. A PR changes a staging model. Which models does `state:modified+` build, and where?
+4. Why can't the incremental models be compiled offline?
+5. Credits went up but query time did not. Where do you look first?

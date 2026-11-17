@@ -29,6 +29,10 @@ Use the signed Python from python.org (for example `winget install Python.Python
 .\scripts\dbt.ps1 --version        # dbt through the signed python.exe, not dbt.exe
 ```
 
+## CI/CD
+
+Every pull request to `main` must pass three checks before it can merge: `Python tests` and `dbt parse and compile` (GitHub Actions, no Snowflake login) and `dbt Cloud` (builds only the changed models in their own `dbt_cloud_pr_*` schemas). Production rebuilds on a dbt Cloud schedule, and the dbt documentation site republishes to GitHub Pages on every merge. Details in [Phase 15](docs/phase-15.md).
+
 ## Start here
 
 1. Clone the repository and open PowerShell in its root.
