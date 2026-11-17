@@ -70,3 +70,14 @@ SELECT SCHEMA_NAME, CREATED
 FROM RETAIL_DWH.INFORMATION_SCHEMA.SCHEMATA
 WHERE SCHEMA_NAME ILIKE 'DBT_CLOUD_PR_%' OR SCHEMA_NAME ILIKE 'DEV_%'
 ORDER BY CREATED;
+
+-- 8. Who uses the other warehouses (COMPUTE_WH is normally the Snowsight worksheets).
+--    Compare execution minutes with the credits from query 3: a big gap means idle time,
+--    which a shorter auto-suspend removes (see 00_setup/cost_guardrails.sql).
+SELECT WAREHOUSE_NAME, USER_NAME, ROLE_NAME, COUNT(*) AS queries,
+       ROUND(SUM(EXECUTION_TIME) / 60000, 1) AS exec_minutes
+FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+WHERE START_TIME >= DATEADD(day, -30, CURRENT_TIMESTAMP())
+  AND WAREHOUSE_NAME <> 'RETAILFLOW_WH'
+GROUP BY 1, 2, 3
+ORDER BY queries DESC;
