@@ -13,6 +13,12 @@ models:
           - accepted_values:
               arguments:
                 values: [NO_FILES_YET, ON_TIME, LATE]
+      - name: last_attempt_status
+        description: Status of the most recent attempt for the feed, whatever its outcome.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [RECEIVED, LOADED, SKIPPED, FAILED, REJECTED]
   - name: mon_open_file_issues
     description: >
       Phase 14. Files that need an operator: latest attempt FAILED, stuck in RECEIVED, or a
