@@ -47,7 +47,7 @@ Sources (BRONZE, AUDIT, CONTROL) are read-only and never prefixed. `RETAIL_DBT_R
 
 | What | How | When |
 |---|---|---|
-| Production data | dbt Cloud deploy job `prod_build` in environment `Production` (profile `retailflow_prod`, role `RETAIL_DBT_ROLE`, warehouse `RETAILFLOW_WH`, target `prod`): `dbt build`, generate docs | Cron `0 14 * * 1,3,5`, plus on demand (for example `python -m landing scan --trigger-dbt`) |
+| Production data | dbt Cloud deploy job `prod_build` in environment `Production` (profile `retailflow_prod`, role `RETAIL_DBT_ROLE`, warehouse `RETAILFLOW_WH`; the run log reports target `default`, which nothing in the project depends on): `dbt build`, generate docs | Cron `0 14 * * 1,3,5`, plus on demand (for example `python -m landing scan --trigger-dbt`) |
 | Documentation site | [docs.yml](../.github/workflows/docs.yml): `dbt parse`, `dbt docs generate --no-compile --empty-catalog --static`, deploy to GitHub Pages | Every push to `main` that touches `dbt_retailflow/` |
 | Branch protection | Ruleset `protect_main`: PR required (0 approvals, one developer), the three checks above required, no deletion, no force push | Always |
 

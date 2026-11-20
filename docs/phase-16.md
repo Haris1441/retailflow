@@ -63,7 +63,7 @@ Expect three `LOADED` lines and "New data in Bronze. Run the dbt build". The fil
 .\.venv\Scripts\python.exe -m landing --prompt-snowflake-password scan
 ```
 
-Expect `REJECTED customers_latest_FINAL.jsonl` (the name matches no feed) and `SKIPPED` for the redelivered file (same SHA-256 as a file already loaded). Nothing is loaded twice, and the bad file is parked in `error\` with a reason in the registry.
+Expect `REJECTED customers_latest_FINAL.jsonl` (the name matches no feed) and `SKIPPED` for the redelivered file (same SHA-256 as a file already loaded). The rejected file is parked with a time suffix if an earlier copy is already in `error\`. Nothing is loaded twice, and the bad file is parked in `error\` with a reason in the registry.
 
 ### Act 5 · Production rebuild (3 to 5 minutes)
 
@@ -84,7 +84,7 @@ Run [demo.sql](../sql/snowflake/05_validation/demo.sql) one query at a time:
 | 5 History | New Type 2 versions start at the delivery time; old versions are closed, not overwritten; price + 5 |
 | 6 Gold | Past orders keep the tier in force when they were placed; the current row shows the new tier |
 | 7 Reconciliation | All 7 checks PASS, and step 0 now includes the demo files with no manifest edit |
-| 8 Monitoring | Feeds ON_TIME and OK; the only open issues are the deliberately misnamed files |
+| 8 Monitoring | Feeds ON_TIME and OK; the only open issue is the misnamed file name (one row per name) |
 
 Close with cost: the whole platform ran on about 6 Snowflake credits in its first 10 days, with auto-suspend and a 20-credit monthly cap.
 
@@ -105,3 +105,19 @@ The demo adds one real delivery. That is safe to keep: every later demo picks th
 ## Definition of done
 
 The demo runs end to end without manual fixes: 3 files LOADED, 1 REJECTED, 1 SKIPPED, `prod_build` green, every `demo.sql` check as expected, all reconciliation checks PASS. The interview guide and the README tell the story without the presenter.
+
+## Outcome (2026-11-20, rehearsal)
+
+Run end to end in about 15 minutes with no manual fixes.
+
+| Step | Result |
+|---|---|
+| Pre-flight | 38 Python tests passed; Snowflake login OK; inbox and processing empty; last `prod_build` (scheduled, Friday 14:02 UTC, commit `0c9859f`) Success; baseline reconciliation 7 PASS with steps 0-3 at 5 / 53 / 18 / 53; one open issue (the Phase 14 misnamed file) |
+| Delivery | `simulate` produced `BATCH_20250304T090000`: customers 3 rows, products 2, customer_events 5, each with a control file (row count, SHA-256) |
+| Scan | 3 LOADED, each in its own audited Bronze run; files archived to `archive\2026-11-20\` |
+| Failures | `customers_latest_FINAL.jsonl` REJECTED and parked in `error\` beside the Phase 14 copy (time suffix, nothing overwritten); the redelivered customer_events file SKIPPED by checksum |
+| Production rebuild | `prod_build` run by hand: 98 models, 179 data tests, 4 seeds; 281 total, 253 success, 28 no-op (the 20 intermediate and 8 check models are ephemeral); no warnings, no errors; 88 s |
+| Evidence 1-4 | Registry decisions, lineage OK for all 3 files, Silver current rows 3 / 2 / 5, two events 21 days late picked up by the incremental model |
+| Evidence 5-7 | Type 2 history, Gold point in time and reconciliation all as expected; all 7 reconciliation checks PASS |
+| Monitoring | customers 4 files loaded, 1 failed attempt, 0 open failures, 11 rows; products 2 loaded, 2 skipped, 4 rows; customer_events 2 loaded, 1 skipped, 10 rows, last attempt SKIPPED. All ON_TIME and OK |
+| Open issues | 1 row: `REJECTED_NAME customers_latest_FINAL.jsonl`. The view keeps one row per file name (its latest attempt), so a client repeating the same bad name is one problem to fix; the registry keeps every attempt |

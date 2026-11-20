@@ -11,7 +11,7 @@ SELECT DETECTED_AT, FILE_NAME, STATUS, FEED_NAME, EXPECTED_ROWS, EXTRACTED_ROWS,
 FROM CONTROL.FILE_REGISTRY
 WHERE BATCH_ID = $demo_batch OR BATCH_ID IS NULL AND DETECTED_AT >= DATEADD(hour, -6, CURRENT_TIMESTAMP())
 ORDER BY DETECTED_AT;
--- Expect 3 x LOADED: customers 3, products 2, customer_events 5. Plus whatever the failure act added:
+-- Expect 3 x LOADED: customers 3, products 2, customer_events 5 (rehearsal 2026-11-20: as expected). Plus whatever the failure act added:
 -- REJECTED for the hand-named file, SKIPPED for the redelivery.
 
 -- 2. Lineage: file -> audited Bronze run -> Bronze rows. Every row says OK.
@@ -72,4 +72,4 @@ SELECT FEED_NAME, FILES_LOADED, FILES_SKIPPED, FAILED_ATTEMPTS, OPEN_FAILURES, R
        LAST_LOADED_BATCH, LAST_ATTEMPT_STATUS, FRESHNESS_STATUS, HEALTH
 FROM DATA_QUALITY.MON_FILE_FEEDS WHERE FILES_LOADED > 0 OR FAILED_ATTEMPTS > 0 ORDER BY FEED_NAME;
 SELECT ISSUE_TYPE, FILE_NAME, ERROR_MESSAGE FROM DATA_QUALITY.MON_OPEN_FILE_ISSUES;
--- Expect only the deliberately misnamed file(s) as open issues
+-- Expect one REJECTED_NAME row per misnamed file name (its latest attempt), nothing else
