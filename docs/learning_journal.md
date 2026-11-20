@@ -289,3 +289,21 @@ Integrations matter: dbt Cloud connected by a plain git URL can deploy but canno
 3. A PR changes a staging model. Which models does `state:modified+` build, and where?
 4. Why can't the incremental models be compiled offline?
 5. Credits went up but query time did not. Where do you look first?
+
+## Phase 16
+
+A demo is a test run in public. The pre-flight checks (tests, login, empty inbox, green production run, a reconciliation baseline) are what make it boring, and a baseline turns "it works" into "it changed exactly this": steps 0 to 3 moved by three items each, nothing else moved.
+
+Predict before you run. Writing the expected result next to each query caught one wrong expectation (open issues are tracked per file name, not per attempt) and confirmed everything else. A surprise is either a bug or a gap in your own understanding; both are worth finding before an interviewer does.
+
+Tell the story by following one record. A single delivery, traced from the file to the registry, the audited run, Bronze, Silver, history, Gold and the reconciliation gate, explains the architecture better than a diagram.
+
+Be honest about limits. The free dbt plan, the undeployed Azure version, the paused Fivetran comparison and the personal production login are design choices with reasons and next steps, not things to hide.
+
+### Practice questions
+
+1. Why take a reconciliation baseline before the demo delivery?
+2. The demo produced 28 no-op nodes in the dbt run. What are they and why is that fine?
+3. A client sends the same misnamed file every day. How many open issues do you see, and where are all the attempts?
+4. Which single query in demo.sql best convinces a sceptical stakeholder, and why?
+5. What would you change first if this platform went to production tomorrow?

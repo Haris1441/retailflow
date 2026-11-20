@@ -1,6 +1,22 @@
 # RetailFlow
 
-RetailFlow is a hands-on retail analytics platform for tracking sales, returns, inventory, customer value and fulfillment across web, mobile and stores. Python will move synthetic BigQuery and API data into Snowflake. dbt will run SQL in Snowflake to build validated retail entities and reporting models.
+RetailFlow is an end-to-end retail data platform for sales, returns, inventory, customer value and fulfillment across web, mobile and stores. Python loads a BigQuery dataset (with deliberately injected defects), a REST API and client files into an append-only Snowflake Bronze layer. dbt Cloud builds staging, a deduplicated Silver layer with data quality quarantine and SCD history, and a Gold star schema with KPI marts. **Every record is accounted for:** a reconciliation gate follows 127,655 records from source to KPI and fails the build if any layer loses or duplicates one.
+
+```
+BigQuery ─┐                                         dbt Cloud
+API ──────┼─► Python ─► BRONZE ─► STAGING ─► SILVER ─► DATA_QUALITY ─► GOLD ─► reconciliation gate
+Files ────┘   (MERGE,   (append-   (typed)   (dispositions,  (rules,     (star     + monitoring
+              audit,     only)               SCD2/SCD3)      quarantine) schema, KPI marts)
+              registry)
+```
+
+| | |
+|---|---|
+| **Stack** | BigQuery, Python, Snowflake, dbt Cloud, GitHub Actions, GitHub Pages (Azure Data Factory design as code) |
+| **Scale** | 98 dbt models, 179 dbt tests, 38 Python tests, 8 source batches, 15 file feeds |
+| **Proof** | Gold matched an independent recomputation to the cent; 7 reconciliation checks pass on every build |
+| **Delivery** | Every change goes through a PR with 3 required checks; production rebuilds on a schedule |
+| **Docs** | [dbt documentation site](https://haris1441.github.io/retailflow/) · [live demo runbook](docs/phase-16.md) · [interview walkthrough](docs/interview-guide.md) |
 
 ## Repository layout
 
@@ -46,7 +62,7 @@ Set-Location retailflow
 & .\scripts\check-local.ps1
 ```
 
-Phase 0 adds documentation and a local diagnostic. Source SQL, API, ingestion and dbt directories will be added as their phases deliver runnable code. Configuration keys and dependency pins will be introduced with their first consumers. Cloud resource setup requires explicit approval.
+The project was built in 16 phases. Each runbook below has the exact steps, the validation queries and the recorded outcome.
 
 [Phase 1 design review](docs/phase-1.md) covers the source mapping, business rules and local SQL example.
 
@@ -77,3 +93,7 @@ Phase 0 adds documentation and a local diagnostic. Source SQL, API, ingestion an
 [Phase 13 reconciliation](docs/phase-13.md) proves every record and amount from the source manifest through Bronze, the load audit, Silver and Gold to the KPI marts, with an exclusion register, and fails the build if any layer breaks.
 
 [Phase 14 file-driven orchestration](docs/phase-14.md) loads client files the moment they land: the file name identifies the feed and batch by regex, a control file proves the delivery is complete, every attempt is logged, redeliveries are skipped, failures are recoverable, and monitoring shows what needs attention.
+
+[Phase 15 CI/CD, documentation and cost](docs/phase-15.md) tests every pull request offline and in isolated Snowflake schemas, requires the checks before merge, schedules production, publishes the docs site and caps warehouse spend.
+
+[Phase 16 demonstration](docs/phase-16.md) runs the whole platform live, from a client delivery to the KPI layer, and the [interview walkthrough](docs/interview-guide.md) explains the decisions behind it.
